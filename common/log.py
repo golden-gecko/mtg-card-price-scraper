@@ -10,7 +10,7 @@ def get_logger(name=None):
     global logger
 
     if logger is None:
-        formatter = logging.Formatter('[%(asctime)s] [%(levelname)5s] %(message)s')
+        formatter = logging.Formatter('[%(asctime)s] [%(levelname)7s] %(message)s')
 
         stdout_handler = logging.StreamHandler(sys.stdout)
         stdout_handler.setFormatter(formatter)

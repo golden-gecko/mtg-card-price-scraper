@@ -6,7 +6,14 @@ from log import get_logger
 class Mongo:
     def __init__(self, host):
         self.client = MongoClient(host)
+
         self.db = self.client.gatherer
+
+        self.db.cards.create_index([('card_id', ASCENDING)], unique=True)
+        self.db.formats.create_index([('name', ASCENDING)], unique=True)
+        self.db.pages.create_index([('page_id', ASCENDING)], unique=True)
+        self.db.sets.create_index([('name', ASCENDING)], unique=True)
+        self.db.types.create_index([('name', ASCENDING)], unique=True)
 
         self.logger = get_logger(__name__)
 
