@@ -1,18 +1,12 @@
-from flask import jsonify
-
-from models.set import Set
+from helpers import create_response
+from mongo import Mongo
 
 
 def route_sets():
-    sets = Set.query.all()
+    mongo = Mongo(host='mongo')
 
-    response = {
-        'data': {
-            'sets': sets
-        },
-        'status': {
-            'code': 200
-        }
+    data = {
+        'sets': [x for x in mongo.get_sets()]
     }
 
-    return jsonify(response)
+    return create_response(code=200, data=data)

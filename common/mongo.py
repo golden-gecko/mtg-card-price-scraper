@@ -1,4 +1,4 @@
-from pymongo import MongoClient
+from pymongo import ASCENDING, MongoClient
 
 from log import get_logger
 
@@ -18,6 +18,18 @@ class Mongo:
 
     def delete_types(self):
         return self.db.types.delete_many({})
+
+    def get_cards(self):
+        return self.db.cards.find({}, {'_id': False}).sort('name', ASCENDING)
+
+    def get_formats(self):
+        return self.db.formats.find({}, {'_id': False}).sort('name', ASCENDING)
+
+    def get_sets(self):
+        return self.db.sets.find({}, {'_id': False}).sort('name', ASCENDING)
+
+    def get_types(self):
+        return self.db.types.find({}, {'_id': False}).sort('name', ASCENDING)
 
     def index_card(self, data) -> bool:
         return self.db.cards.insert_one(data)

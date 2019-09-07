@@ -51,14 +51,14 @@ paths:
         200:
           description: "Success"
 
-  /scraper/gatherer/cards/{id}:
+  /scrapers/gatherer/cards/{card_id}:
     post:
       summary: "Queue Gatherer card for processing"
-      operationId: "routes.scraper.gatherer.route_cards"
+      operationId: "routes.scrapers.gatherer.route_cards"
       produces:
         - "application/json"
       parameters:
-        - name: "id"
+        - name: "card_id"
           in: "path"
           description: "ID of Gatherer card"
           required: true
@@ -68,14 +68,14 @@ paths:
         200:
           description: "Success"
 
-  /scraper/gatherer/pages/{id}:
+  /scrapers/gatherer/pages/{page_id}:
     post:
       summary: "Queue Gatherer page for processing"
-      operationId: "routes.scraper.gatherer.route_pages"
+      operationId: "routes.scrapers.gatherer.route_pages"
       produces:
         - "application/json"
       parameters:
-        - name: "id"
+        - name: "page_id"
           in: "path"
           description: "ID of Gatherer page"
           required: true

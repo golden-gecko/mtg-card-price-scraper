@@ -1,18 +1,12 @@
-from flask import jsonify
-
-from models.format import Format
+from helpers import create_response
+from mongo import Mongo
 
 
 def route_formats():
-    formats = Format.query.all()
+    mongo = Mongo(host='mongo')
 
-    response = {
-        'data': {
-            'formats': formats
-        },
-        'status': {
-            'code': 200
-        }
+    data = {
+        'formats': [x for x in mongo.get_formats()]
     }
 
-    return jsonify(response)
+    return create_response(code=200, data=data)

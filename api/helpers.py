@@ -1,11 +1,15 @@
-def create_error_response(code: int, message=None):
+from flask import jsonify
+
+
+def create_response(code: int, message=None, data=None):
     response = {
-        'status': {
-            'code': code
-        }
+        'code': code
     }
 
     if message:
-        response['status']['message'] = message
+        response['message'] = message
 
-    return response
+    if data:
+        response['data'] = data
+
+    return jsonify(response), code
