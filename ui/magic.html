@@ -1,0 +1,106 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <title>Magic</title>
+
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <link href="css/magic.css" rel="stylesheet">
+    </head>
+
+    <body>
+        <div id="container" class="container">
+            <form id="search-form">
+                <div class="form-group row">
+                    <label for="search-format" class="col-sm-2 col-form-label">Format</label>
+                    <div class="col-sm-10">
+                        <select id="search-format" class="form-control" name="format">
+                            <option></option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="search-set" class="col-sm-2 col-form-label">Set</label>
+                    <div class="col-sm-10">
+                        <select id="search-set" class="form-control" name="set">
+                            <option></option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="search-type" class="col-sm-2 col-form-label">Type</label>
+                    <div class="col-sm-10">
+                        <select id="search-type" class="form-control"  name="name">
+                            <option></option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <div class="col-sm-10">
+                        <button id="search-button" type="submit" class="btn btn-primary">Search</button>
+                    </div>
+                </div>
+            </form>
+
+            <div id="search-results">
+
+            </div>
+        </div>
+
+        <script src="js/jquery-3.3.1.min.js"></script>
+        <script src="js/popper.min.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script>
+            var search_form = $('#search-form');
+            var search_results = $('#search-results');
+
+            function setup() {
+                $.ajaxSetup({
+                    cache: false
+                });
+            }
+
+            function init_select(type, element) {
+                $.getJSON('http://apollo.local:7000/magic/' + type + 's', function(json) {
+                    $.each(json, function(k, v) {
+                        var option = $('<option>');
+
+                        option.val(v);
+                        option.text(v);
+                        option.appendTo(element);
+                    });
+                });
+            }
+
+            function init() {
+                init_select('format', $('#search-format'));
+                init_select('set', $('#search-set'));
+                init_select('type', $('#search-type'));
+            }
+
+            function search() {
+                $.getJSON('http://apollo.local:7000/magic/cards?' + search_form.serialize(), function(json) {
+                    search_results.empty();
+
+                    $.each(json, function(k, v) {
+                        console.log(k, v);
+
+                        var card = $('<div>');
+                        card.html(v.oracle.name);
+                        card.appendTo(search_results);
+                    });
+                });
+            }
+
+            setup();
+            init();
+            search();
+        </script>
+    </body>
+</html>

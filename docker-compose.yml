@@ -1,0 +1,120 @@
+version: "3.7"
+
+services:
+
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    depends_on:
+      - elasticsearch
+      - mongo
+      - postgres
+    ports:
+      - 8000:8000
+    restart: always
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.3.1
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    restart: always
+    volumes:
+      - elasticsearch:/usr/share/elasticsearch/data
+
+  kibana:
+    depends_on:
+      - elasticsearch
+    image: docker.elastic.co/kibana/kibana:7.3.1
+    ports:
+      - 5601:5601
+    restart: always
+    volumes:
+      - kibana:/usr/share/kibana/config
+
+  mongo:
+    image: mongo:4.2.0
+    restart: always
+    volumes:
+      - mongo:/data/db
+
+  mongo_express:
+    depends_on:
+      - mongo
+    image: mongo-express:0.49.0
+    ports:
+      - 8081:8081
+    restart: always
+
+  postgres:
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    image: postgres:10.5
+    ports:
+      - 5432:5432
+    restart: always
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+  rabbit:
+    build:
+      context: rabbit
+    ports:
+      - 15672:15672
+    restart: always
+    volumes:
+      - rabbit:/var/lib/rabbitmq
+
+  redis:
+    image: redis:5.0.5
+    ports:
+      - 6379:6379
+    restart: always
+    volumes:
+      - redis:/data
+
+  scraper:
+    build:
+      context: .
+      dockerfile: scraper/Dockerfile
+    depends_on:
+      - elasticsearch
+      - mongo
+      - postgres
+      - rabbit
+    restart: always
+    volumes:
+      - scraper:/data
+
+  selenium_hub:
+    image: selenium/hub:3.141.59
+    restart: always
+
+  selenium_node_chrome:
+    depends_on:
+      - selenium_hub
+    environment:
+      - HUB_HOST=selenium_hub
+      - SE_OPTS=-browserTimeout 60 -timeout 60 -cleanUpCycle 60
+    image: selenium/node-chrome:3.141.59
+    restart: always
+
+  ui:
+    build:
+      context: .
+      dockerfile: ui/Dockerfile
+    depends_on:
+      - api
+    ports:
+      - 80:80
+    restart: always
+
+volumes:
+  elasticsearch:
+  kibana:
+  mongo:
+  postgres:
+  rabbit:
+  redis:
+  scraper:
