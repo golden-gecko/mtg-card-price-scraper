@@ -9,10 +9,29 @@ info:
 schemes:
 - "http"
 
+tags:
+  - name: "API"
+  - name: "Gatherer"
+  - name: "Magic"
+  - name: "Maintenance"
+
 paths:
+  /healthcheck:
+    get:
+      tags:
+        - "Maintenance"
+      summary: "Returns service status"
+      operationId: "routes.healthcheck.route_healthcheck"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Success"
 
   /cards:
     get:
+      tags:
+        - "API"
       summary: "Return card list"
       operationId: "routes.cards.route_cards"
       produces:
@@ -23,6 +42,8 @@ paths:
 
   /formats:
     get:
+      tags:
+        - "API"
       summary: "Return format list"
       operationId: "routes.formats.route_formats"
       produces:
@@ -33,6 +54,8 @@ paths:
 
   /sets:
     get:
+      tags:
+        - "API"
       summary: "Return set list"
       operationId: "routes.sets.route_sets"
       produces:
@@ -43,6 +66,8 @@ paths:
 
   /types:
     get:
+      tags:
+        - "API"
       summary: "Return type list"
       operationId: "routes.types.route_types"
       produces:
@@ -53,6 +78,8 @@ paths:
 
   /scrapers/gatherer/cards/{card_id}:
     post:
+      tags:
+        - "Gatherer"
       summary: "Queue Gatherer card for processing"
       operationId: "routes.scrapers.gatherer.route_cards"
       produces:
@@ -70,6 +97,8 @@ paths:
 
   /scrapers/gatherer/pages/{page_id}:
     post:
+      tags:
+        - "Gatherer"
       summary: "Queue Gatherer page for processing"
       operationId: "routes.scrapers.gatherer.route_pages"
       produces:
@@ -78,6 +107,44 @@ paths:
         - name: "page_id"
           in: "path"
           description: "ID of Gatherer page"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        200:
+          description: "Success"
+
+  /scrapers/magic/cards/{card_id}:
+    post:
+      tags:
+        - "Magic"
+      summary: "Queue MTG API card for processing"
+      operationId: "routes.scrapers.magic.route_cards"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "card_id"
+          in: "path"
+          description: "ID of MTG API card"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        200:
+          description: "Success"
+
+  /scrapers/magic/pages/{page_id}:
+    post:
+      tags:
+        - "Magic"
+      summary: "Queue MTG API page for processing"
+      operationId: "routes.scrapers.magic.route_pages"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "page_id"
+          in: "path"
+          description: "ID of MTG API page"
           required: true
           type: "integer"
           format: "int64"

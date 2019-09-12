@@ -70,7 +70,7 @@ def run_migrations_online():
             script = directives[0]
             if script.upgrade_ops.is_empty():
                 directives[:] = []
-                logger.info('No changes in schema detected.')
+                logger.debug('No changes in schema detected.')
 
     connectable = engine_from_config(
         config.get_section(config.config_ini_section),

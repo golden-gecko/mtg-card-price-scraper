@@ -3,27 +3,30 @@ import logging.handlers
 import sys
 
 
-logger = None
+loggers = {}
 
 
 def get_logger(name=None):
-    global logger
+    global loggers
 
-    if logger is None:
-        formatter = logging.Formatter('[%(asctime)s] [%(levelname)7s] %(message)s')
+    if name not in loggers:
+        # formatter = logging.Formatter('[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s')
+        formatter = logging.Formatter('[%(asctime)s] [%(filename)s] [%(lineno)d] [%(levelname)s] %(message)s')
 
         stdout_handler = logging.StreamHandler(sys.stdout)
         stdout_handler.setFormatter(formatter)
 
-        logger = logging.getLogger(name)
-        logger.addHandler(stdout_handler)
-        logger.setLevel(logging.DEBUG)
+        loggers[name] = logging.getLogger(name)
+        loggers[name].addHandler(stdout_handler)
+        loggers[name].setLevel(logging.DEBUG)
 
-    return logger
+    return loggers[name]
 
 
 def log_call(instance=None):
+    logger = get_logger(__name__)
+
     if instance is None:
-        get_logger().debug('%s()', inspect.stack()[1][3])
+        logger.debug('%s()', inspect.stack()[1][3])
     else:
-        get_logger().debug('%s.%s()', type(instance).__name__, inspect.stack()[1][3])
+        logger.debug('%s.%s()', type(instance).__name__, inspect.stack()[1][3])
