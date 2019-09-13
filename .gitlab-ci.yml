@@ -1,0 +1,8 @@
+image: "debian:10.1-slim"
+
+before_script:
+  - apt-get update
+
+build:
+  script:
+    - ./build.sh
