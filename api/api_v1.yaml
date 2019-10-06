@@ -76,6 +76,70 @@ paths:
         200:
           description: "Success"
 
+  /scrapers/default/pages:
+    post:
+      tags:
+        - "Scraper"
+      summary: "Queue page for indexing"
+      operationId: "routes.scrapers.default.route_pages_post"
+      produces:
+        - "application/json"
+      parameters:
+        - name: page
+          in: body
+          schema:
+            type: object
+            properties:
+              configuration:
+                type: string
+                example: shop
+              stage:
+                type: string
+                example: main
+              url:
+                type: string
+                example: https://shop/products
+      responses:
+        200:
+          description: "Success"
+    put:
+      tags:
+        - "Scraper"
+      summary: "Queue page for refreshing"
+      operationId: "routes.scrapers.default.route_pages_put"
+      produces:
+        - "application/json"
+      parameters:
+        - name: page
+          in: body
+          schema:
+            type: object
+            properties:
+              configuration:
+                type: string
+                example: shop
+              stage:
+                type: string
+                example: main
+              url:
+                type: string
+                example: https://shop/products
+      responses:
+        200:
+          description: "Success"
+
+  /scrapers/default/statistics:
+    get:
+      tags:
+        - "Scraper"
+      summary: "Return statistics"
+      operationId: "routes.scrapers.default.route_statistics"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Success"
+
   /scrapers/gatherer/cards/{card_id}:
     post:
       tags:

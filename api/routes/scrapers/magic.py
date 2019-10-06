@@ -1,7 +1,7 @@
 from helpers import create_response
-from magic import MagicClient
 from mongo import MongoMagic
 from rabbit import RabbitClient
+from scrapers.magic import MagicClient
 
 
 def route_cards(card_id):

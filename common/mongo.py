@@ -8,7 +8,6 @@ class MongoGatherer:
         self.client = MongoClient(host)
 
         self.db = self.client.gatherer
-
         self.db.cards.create_index([('card_id', ASCENDING)], unique=True)
         self.db.colors.create_index([('name', ASCENDING)], unique=True)
         self.db.formats.create_index([('name', ASCENDING)], unique=True)
@@ -94,7 +93,6 @@ class MongoMagic:
         self.client = MongoClient(host)
 
         self.db = self.client.magic
-
         self.db.blocks.create_index([('name', ASCENDING)], unique=True)
         self.db.expansions.create_index([('name', ASCENDING)], unique=True)
         self.db.formats.create_index([('name', ASCENDING)], unique=True)
@@ -191,17 +189,3 @@ class MongoMagic:
 
     def index_type(self, data) -> bool:
         return self.db.types.insert_one(data)
-
-
-class MongoScraper:
-    def __init__(self, host):
-        self.client = MongoClient(host)
-
-        self.db = self.client.scraper
-
-        self.db.pages.create_index([('url', ASCENDING)], unique=True)
-
-        self.logger = get_logger(__name__)
-
-    def has_page(self, url):
-        return self.db.pages.find_one({'url': url})
