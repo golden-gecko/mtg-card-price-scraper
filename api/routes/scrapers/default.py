@@ -1,4 +1,5 @@
 import json
+import http
 
 from flask import request
 
@@ -17,11 +18,11 @@ def route_pages_post():
     get_logger().debug(page)
 
     if page.keys() != {'configuration', 'stage', 'url'}:
-        return create_response(code=400)
+        return create_response(code=http.HTTPStatus.BAD_REQUEST)
 
     queue.publish('scraper_{}'.format(page['configuration']), json.dumps(page))
 
-    return create_response(code=200)
+    return create_response()
 
 
 def route_pages_put():
@@ -33,13 +34,13 @@ def route_pages_put():
     get_logger().debug(page)
 
     if page.keys() != {'configuration', 'stage', 'url'}:
-        return create_response(code=400)
+        return create_response(code=http.HTTPStatus.BAD_REQUEST)
 
     page['refresh'] = True
 
     queue.publish('scraper_{}'.format(page['configuration']), json.dumps(page))
 
-    return create_response(code=200)
+    return create_response()
 
 
 def route_statistics():
@@ -49,4 +50,4 @@ def route_statistics():
         'db': db.get_statistics()
     }
 
-    return create_response(code=200, data=statistics)
+    return create_response(data=statistics)

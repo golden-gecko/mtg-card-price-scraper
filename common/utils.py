@@ -7,10 +7,10 @@ from requests.exceptions import ConnectionError
 from urllib3.exceptions import MaxRetryError
 
 from datetime import datetime
-from log import get_logger, log_call
+from log import get_logger
 
 
-def download_and_save_image(url, file_name):
+def download_and_save_image(url: str, file_name: str):
     logger = get_logger(__name__)
     logger.debug('Trying to download %s', url)
 
@@ -63,7 +63,7 @@ def download(url: str, proxy=None):
     return response.text
 
 
-def download_and_save_text(url, file_name):
+def download_and_save_text(url: str, file_name: str):
     logger = get_logger(__name__)
     logger.debug('Trying to download %s', url)
 
@@ -98,7 +98,7 @@ def load_file(file_name) -> str:
         return file.read().decode('utf-8')
 
 
-def save_to_file(file_name, data):
+def save_to_file(file_name: str, data) -> None:
     get_logger(__name__).debug('Saving file "%s"', file_name)
 
     directory_name = os.path.dirname(file_name)
@@ -108,3 +108,23 @@ def save_to_file(file_name, data):
 
     with open(file_name, 'wb') as file:
         file.write(data.encode('utf-8'))
+
+
+def get_time():
+    return datetime.utcnow()
+
+
+def get_duration(start):
+    return (get_time() - start).total_seconds()
+
+
+class ExecutionTime:
+    def __init__(self, name: str):
+        self.name = name
+        self.start = None
+
+    def __enter__(self):
+        self.start = get_time()
+
+    def __exit__(self, type, value, traceback):
+        get_logger(__name__).debug('%s took %s seconds', self.name, get_duration(self.start))

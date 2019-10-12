@@ -9,4 +9,4 @@ def route_formats():
         'formats': [x for x in mongo.get_formats()]
     }
 
-    return create_response(code=200, data=data)
+    return create_response(data=data)

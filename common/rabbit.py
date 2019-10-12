@@ -22,7 +22,7 @@ class RabbitClient:
     def create_channel(self):
         return self.connection.channel()
 
-    def send(self, channel, queue_name, value):
+    def send(self, channel, queue_name, value) -> bool:
         channel.basic_publish(exchange='', routing_key=queue_name, body=value, properties=self.basic_properties)
 
         return True

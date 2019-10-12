@@ -1,10 +1,13 @@
+import http
 import requests
+
+from requests import Response
 
 from flask import jsonify
 from log import get_logger
 
 
-def create_response(code: int, message=None, data=None):
+def create_response(code: int = http.HTTPStatus.OK, message: str = '', data=None) -> tuple:
     response = {
         'code': code
     }
@@ -18,7 +21,7 @@ def create_response(code: int, message=None, data=None):
     return jsonify(response), code
 
 
-def send_get(url):
+def send_get(url: str) -> Response:
     logger = get_logger(__name__)
 
     logger.debug('Sending GET to %s...', url)

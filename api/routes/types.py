@@ -9,4 +9,4 @@ def route_types():
         'types': [x for x in mongo.get_types()]
     }
 
-    return create_response(code=200, data=data)
+    return create_response(data=data)
