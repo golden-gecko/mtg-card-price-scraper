@@ -14,7 +14,7 @@ docker-compose up \
     --scale postgres=0 \
     --scale rabbit=1 \
     --scale redis=0 \
-    --scale scraper_gatherer=0 \
+    --scale scraper_gatherer=1 \
     --scale scraper_mtg=1 \
     --scale selenium_hub=0 \
     --scale selenium_node_chrome=0 \

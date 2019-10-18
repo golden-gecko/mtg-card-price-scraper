@@ -1,28 +1,25 @@
+from scrapers.gatherer import GathererClient
 from log import get_logger
-from scrapers.default.cache import ScraperCache
-from scrapers.default.client import ScraperClient
-from scrapers.default.db import ScraperDb
-from scrapers.default.queue import ScraperQueue
+from mongo import MongoGatherer, MongoMagic
+from rabbit import RabbitClient
+from scrapers.magic import MagicClient
 
 
 if __name__ == '__main__':
     logger = get_logger(__name__)
     logger.info('Service starting...')
 
-    gatherer = {
-        'init': [
-            {
-                'stage': 'main',
-                'url': 'http://gatherer.wizards.com/Pages/Search/Default.aspx?page=1&name=+[]'
-            }
-        ]
-    }
+    mongo = MongoGatherer(host='mongo')
+    rabbit = RabbitClient(host='rabbit')
 
-    try:
-        scraper = ScraperClient(ScraperCache('/data'), ScraperDb('mongo', 'gatherer'), ScraperQueue('rabbit'))
-        scraper.add_configuration('gatherer', gatherer)
-        scraper.process()
-    except Exception as e:
-        logger.critical('Scraper failed: %s', e)
+    gatherer = GathererClient(mongo=mongo, rabbit=rabbit)
+    gatherer.process_search()
+    gatherer.process()
+
+    # mongo = MongoMagic(host='mongo')
+    # rabbit = RabbitClient(host='rabbit')
+
+    # magic = MagicClient(mongo=mongo, rabbit=rabbit)
+    # magic.process()
 
     logger.info('Service exiting...')

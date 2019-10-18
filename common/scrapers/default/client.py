@@ -78,13 +78,14 @@ class ScraperClient:
 
     def download_url(self, prefix, url):
         url_html, url_path, url_timestamp = self.cache.get(prefix, url)
+        url_download_time = None
 
         if url_html:
             self.logger.debug('Page "%s" found in cache', url)
         else:
             self.logger.warning('Page "%s" not found in cache', url)
 
-            url_html = download(url)
+            url_html, url_download_time = download(url)
 
             if url_html:
                 self.logger.debug('Page "%s" downloaded', url)
@@ -93,7 +94,7 @@ class ScraperClient:
             else:
                 raise ScraperProcessingException('Failed to download page "{}"'.format(url))
 
-        return url_html, url_path, url_timestamp
+        return url_html, url_path, url_timestamp, url_download_time
 
     def validate_configuration(self, queue_name):
         configuration_name = queue_name.routing_key.replace('scraper_', '', 1)
@@ -195,8 +196,23 @@ class ScraperClient:
                         self.logger.warning('Page is already indexed: %s', e)
 
                 with ExecutionTime('Downloading page'):
-                    url_html, cache_path, cache_timestamp = self.download_url(configuration_name, task['url'])
+                    url_html, cache_path, cache_timestamp, url_download_time = self.download_url(configuration_name, task['url'])
                     url_soup = BeautifulSoup(url_html, 'html.parser')
+
+                    stats = {
+                        'configuration': configuration_name,
+                        'stage': task['stage'],
+                        'timestamp': get_timestamp(),
+                        'url': task['url'],
+                    }
+
+                    if url_download_time:
+                        stats['download_time'] = url_download_time
+                        stats['cache'] = False
+                    else:
+                        stats['cache'] = True
+
+                    self.db.index_stats(stats)
 
                 page = ScraperPage(self.db, task)
 

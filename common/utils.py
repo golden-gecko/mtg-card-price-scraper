@@ -10,8 +10,10 @@ from datetime import datetime
 from log import get_logger
 
 
+logger = get_logger(__name__)
+
+
 def download_and_save_image(url: str, file_name: str):
-    logger = get_logger(__name__)
     logger.debug('Trying to download %s', url)
 
     try:
@@ -38,7 +40,6 @@ def download_and_save_image(url: str, file_name: str):
 
 
 def download(url: str, proxy=None):
-    logger = get_logger(__name__)
     logger.debug('Trying to download %s', url)
 
     if proxy:
@@ -50,21 +51,22 @@ def download(url: str, proxy=None):
         proxies = None
 
     try:
+        start = get_time()
         response = requests.get(url, proxies=proxies)
+        download_time = get_duration(start)
     except (ConnectionError, MaxRetryError) as e:
         logger.error('Failed to download: %s', e)
-        return False
+        return False, None
 
     logger.debug('Response status_code: %d', response.status_code)
 
     if response.status_code != 200:
-        return False
+        return False, None
 
-    return response.text
+    return response.text, download_time
 
 
 def download_and_save_text(url: str, file_name: str):
-    logger = get_logger(__name__)
     logger.debug('Trying to download %s', url)
 
     try:
@@ -92,14 +94,14 @@ def get_timestamp() -> str:
 
 
 def load_file(file_name) -> str:
-    get_logger(__name__).debug('Loading file "%s"', file_name)
+    logger.debug('Loading file "%s"', file_name)
 
     with open(file_name, 'rb') as file:
         return file.read().decode('utf-8')
 
 
 def save_to_file(file_name: str, data) -> None:
-    get_logger(__name__).debug('Saving file "%s"', file_name)
+    logger.debug('Saving file "%s"', file_name)
 
     directory_name = os.path.dirname(file_name)
 
@@ -127,4 +129,4 @@ class ExecutionTime:
         self.start = get_time()
 
     def __exit__(self, type, value, traceback):
-        get_logger(__name__).debug('%s took %s seconds', self.name, get_duration(self.start))
+        logger.debug('%s took %s seconds', self.name, get_duration(self.start))
