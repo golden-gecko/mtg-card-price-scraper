@@ -42,39 +42,46 @@
                 </div>
             </form>
 
-            <div id="search-results">
-
-            </div>
+            <div id="search-results"></div>
         </div>
 
         <script src="js/jquery-3.4.1.min.js"></script>
         <script src="js/bootstrap.min.js"></script>
         <script>
-            var search_form = $('#search-form');
-            var search_results = $('#search-results');
+            class SearchForm {
+                constructor() {
+                    console.log('SearchForm.constructor()');
+
+                    this.search_form = $('#search-form');
+                    this.search_format = this.search_form.find('#search-format');
+                    this.search_set = this.search_form.find('#search-set');
+                    this.search_type = this.search_form.find('#search-type');
+                    this.search_results = $('#search-results');
+
+                    this.init_select('formats', this.search_format);
+                    this.init_select('sets', this.search_set);
+                    this.init_select('types', this.search_type);
+                }
+
+                init_select(type, element) {
+                    console.log('SearchForm.init_select()');
+
+                    $.getJSON('http://192.168.0.162:8000/v1/' + type, function(json) {
+                        $.each(json, function(k, v) {
+                            var option = $('<option>');
+
+                            option.val(v);
+                            option.text(v);
+                            option.appendTo(element);
+                        });
+                    });
+                }
+            }
 
             function setup() {
                 $.ajaxSetup({
                     cache: false
                 });
-            }
-
-            function init_select(type, element) {
-                $.getJSON('http://apollo.local:7000/magic/' + type + 's', function(json) {
-                    $.each(json, function(k, v) {
-                        var option = $('<option>');
-
-                        option.val(v);
-                        option.text(v);
-                        option.appendTo(element);
-                    });
-                });
-            }
-
-            function init() {
-                init_select('format', $('#search-format'));
-                init_select('set', $('#search-set'));
-                init_select('type', $('#search-type'));
             }
 
             function search() {
@@ -91,9 +98,7 @@
                 });
             }
 
-            // setup();
-            // init();
-            // search();
+            var search_form = new SearchForm();
         </script>
     </body>
 </html>

@@ -9,13 +9,16 @@ from scrapers.default.db import ScraperDb
 from scrapers.default.queue import ScraperQueue
 
 
+logger = get_logger(__name__)
+
+
 def route_pages_post():
     queue = ScraperQueue('rabbit')
     queue.connect()
 
     page = request.json
 
-    get_logger().debug(page)
+    logger.debug(page)
 
     if page.keys() != {'configuration', 'stage', 'url'}:
         return create_response(code=http.HTTPStatus.BAD_REQUEST)
@@ -31,7 +34,7 @@ def route_pages_put():
 
     page = request.json
 
-    get_logger().debug(page)
+    logger.debug(page)
 
     if page.keys() != {'configuration', 'stage', 'url'}:
         return create_response(code=http.HTTPStatus.BAD_REQUEST)

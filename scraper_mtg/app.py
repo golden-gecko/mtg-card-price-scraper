@@ -10,15 +10,21 @@ from scrapers.default.queue import ScraperQueue
 logger = get_logger(__name__)
 
 
-def worker(name, configuration):
+def process_pages(name, configuration):
     logger.info('Thread %s starting...', name)
 
-    scraper = ScraperClient(ScraperCache('/data'), ScraperDb('mongo', 'scraper'), ScraperQueue('rabbit'))
+    scraper = ScraperClient(
+        cache=ScraperCache(directory='/data'),
+        db=ScraperDb(host='mongo', database='scraper'),
+        queue=ScraperQueue(host='rabbit')
+    )
     scraper.add_configuration(name, configuration)
     scraper.process()
 
+    logger.info('Thread %s exiting...', name)
 
-if __name__ == '__main__':
+
+def main():
     logger.info('Service starting...')
 
     """
@@ -447,14 +453,20 @@ if __name__ == '__main__':
         threads = []
 
         for name, configuration in configurations.items():
-            x = threading.Thread(target=worker, args=(name, configuration))
+            x = threading.Thread(target=process_pages, args=(name, configuration))
             x.start()
 
             threads.append(x)
 
         for thread in threads:
             thread.join()
+    except KeyboardInterrupt as e:
+        logger.warning('Processing stopped: %s', e)
     except Exception as e:
         logger.critical('Scraper failed: %s', e)
 
     logger.info('Service exiting...')
+
+
+if __name__ == '__main__':
+    main()
