@@ -16,7 +16,7 @@ from utils import ExecutionTime, download, get_timestamp
 
 class ScraperPage:
     def __init__(self, db: ScraperDb, task: dict):
-        self.logger = get_logger(__name__)
+        self.logger = get_logger()
 
         self.db = db
         self.task = task
@@ -35,7 +35,7 @@ class ScraperPage:
 
 class ScraperClient:
     def __init__(self, cache: ScraperCache, db: ScraperDb, queue: ScraperQueue):
-        self.logger = get_logger(__name__)
+        self.logger = get_logger()
 
         self.cache = cache
         self.db = db

@@ -5,7 +5,7 @@ from log import get_logger
 
 class ScraperDb:
     def __init__(self, host, database):
-        self.logger = get_logger(__name__)
+        self.logger = get_logger()
 
         self.client = MongoClient(host)
 

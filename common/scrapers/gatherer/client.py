@@ -1,9 +1,11 @@
+import json
 import os
 import pymongo.errors
 import re
 import time
 
 from bs4 import BeautifulSoup
+from typing import List
 
 from log import get_logger
 from scrapers.gatherer.db import GathererDb
@@ -23,7 +25,7 @@ class GathererClient:
     card_printings_url = 'http://gatherer.wizards.com/Pages/Card/Printings.aspx?multiverseid={card_id}'
 
     def __init__(self, db: GathererDb, queue: GathererQueue):
-        self.logger = get_logger(__name__)
+        self.logger = get_logger()
 
         self.db = db
         self.queue = queue
@@ -84,7 +86,6 @@ class GathererClient:
 
     def _validate_id(self, value):
         try:
-            value = value.decode('utf-8')
             value = int(value)
         except ValueError as e:
             self.logger.error('Value is not valid: %s', e)
@@ -94,21 +95,22 @@ class GathererClient:
             return value
 
     def _get_page_text(self, page_id):
-        file_name = os.path.join('/', 'data', 'pages', '{}.html'.format(page_id))
-        text = self._load_cache(file_name)
-
-        if not text:
-            self.logger.debug('Page not cached. Downloading...')
-
-            text = download_and_save_text(self.page_url.format(page_id=page_id), file_name)
+        with ExecutionTime('Downloading page'):
+            file_name = os.path.join('/', 'data', 'pages', '{}.html'.format(page_id))
+            text = self._load_cache(file_name)
 
             if not text:
-                self.logger.error('Failed to download page %d', page_id)
-                return
-        else:
-            self.logger.debug('Page cached. Fetching from cache...')
+                self.logger.debug('Page not cached. Downloading...')
 
-        return text
+                text = download_and_save_text(self.page_url.format(page_id=page_id), file_name)
+
+                if not text:
+                    self.logger.error('Failed to download page %d', page_id)
+                    return
+            else:
+                self.logger.debug('Page cached. Fetching from cache...')
+
+            return text
 
     def is_flip_card(self, soup):
         side_1 = '#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_ctl02_nameRow'
@@ -126,11 +128,41 @@ class GathererClient:
 
         return None
 
+    def validate_card(self, card):
+        card = card.decode('utf-8')
+        card = json.loads(card)
+
+        if not {'card_id', 'refresh'}.issubset(card.keys()):
+            self.logger.error('Key "card_id" or "refresh" not found in: %s', json.dumps(card))
+
+            return None
+
+        if not self._validate_id(card['card_id']):
+            return None
+
+        return card
+
+    def validate_page(self, page):
+        page = page.decode('utf-8')
+        page = json.loads(page)
+
+        if not {'page_id', 'refresh'}.issubset(page.keys()):
+            self.logger.error('Key "page_id" or "refresh" not found in: %s', json.dumps(page))
+
+            return None
+
+        if self._validate_id(page['page_id']) is None:
+            return None
+
+        return page
+
     def process_card(self, channel, method_frame, header_frame, body):
         with ExecutionTime('Processing card'):
             self.logger.debug('Received card message: %s', body)
 
-            card_id = self._validate_id(body)
+            card = self.validate_card(body)
+            card_id = card['card_id']
+            card_refresh = card['refresh']
 
             if card_id is None:
                 self.logger.error('Failed to process card %d', card_id)
@@ -141,7 +173,7 @@ class GathererClient:
             self.logger.debug('Processing card %d', card_id)
 
             # skip of card was processed
-            if self.is_card_processed(card_id):
+            if not card_refresh and self.is_card_processed(card_id):
                 channel.basic_ack(delivery_tag=method_frame.delivery_tag)
                 return
 
@@ -152,7 +184,8 @@ class GathererClient:
             if not details_oracle_html:
                 self.logger.debug('Card details oracle not cached. Downloading...')
 
-                details_oracle_html = download_and_save_text(self.card_details_oracle_url.format(card_id=card_id), details_oracle_file_name)
+                with ExecutionTime('Downloading card details oracle'):
+                    details_oracle_html = download_and_save_text(self.card_details_oracle_url.format(card_id=card_id), details_oracle_file_name)
 
                 if not details_oracle_html:
                     self.logger.error('Failed to download card details oracle %d', card_id)
@@ -168,7 +201,8 @@ class GathererClient:
             if not details_printed_html:
                 self.logger.debug('Card details printed not cached. Downloading...')
 
-                details_printed_html = download_and_save_text(self.card_details_printed_url.format(card_id=card_id), details_printed_file_name)
+                with ExecutionTime('Downloading card details printed'):
+                    details_printed_html = download_and_save_text(self.card_details_printed_url.format(card_id=card_id), details_printed_file_name)
 
                 if not details_printed_html:
                     self.logger.error('Failed to download card details printed %d', card_id)
@@ -184,7 +218,8 @@ class GathererClient:
             if not self._is_cache_available(image_file_name):
                 self.logger.debug('Card image not cached. Downloading...')
 
-                image = download_and_save_image(self.card_image_url.format(card_id=card_id), image_file_name)
+                with ExecutionTime('Downloading card image'):
+                    image = download_and_save_image(self.card_image_url.format(card_id=card_id), image_file_name)
 
                 if not image:
                     self.logger.error('Downloading card image %d failed', card_id)
@@ -201,7 +236,8 @@ class GathererClient:
             if not languages_html:
                 self.logger.debug('Card languages not cached. Downloading...')
 
-                languages_html = download_and_save_text(self.card_languages_url.format(card_id=card_id), languages_file_name)
+                with ExecutionTime('Downloading card languages'):
+                    languages_html = download_and_save_text(self.card_languages_url.format(card_id=card_id), languages_file_name)
 
                 if not languages_html:
                     self.logger.error('Downloading languages %d failed', card_id)
@@ -218,7 +254,8 @@ class GathererClient:
             if not printings_html:
                 self.logger.debug('Card printings not cached. Downloading...')
 
-                printings_html = download_and_save_text(self.card_printings_url.format(card_id=card_id), printing_file_name)
+                with ExecutionTime('Downloading card printings'):
+                    printings_html = download_and_save_text(self.card_printings_url.format(card_id=card_id), printing_file_name)
 
                 if not printings_html:
                     self.logger.error('Downloading printings %d failed', card_id)
@@ -262,7 +299,7 @@ class GathererClient:
 
                 # process card details oracle
                 with ExecutionTime('Processing card details oracle'):
-                    oracle = self._process_details(details_oracle_soup, prefixes[0])
+                    oracle = self._process_details(soup=details_oracle_soup, prefix=prefixes[0])
 
                 if not oracle:
                     self.logger.error('Failed to process card %d details oracle', card_id)
@@ -274,7 +311,7 @@ class GathererClient:
 
                 # process card details printed
                 with ExecutionTime('Processing card details printed'):
-                    printed = self._process_details(details_printed_soup, prefixes[0])
+                    printed = self._process_details(soup=details_printed_soup, prefix=prefixes[0])
 
                 if not printed:
                     self.logger.error('Failed to process card %d details printed', card_id)
@@ -286,7 +323,7 @@ class GathererClient:
 
                 # process card details oracle (flipped)
                 with ExecutionTime('Processing card details oracle'):
-                    oracle_flipped = self._process_details(details_oracle_soup, prefixes[1])
+                    oracle_flipped = self._process_details(soup=details_oracle_soup, prefix=prefixes[1])
 
                 if not oracle_flipped:
                     self.logger.error('Failed to process card %d details oracle', card_id)
@@ -298,7 +335,7 @@ class GathererClient:
 
                 # process card details printed (flipped)
                 with ExecutionTime('Processing card details printed flipped'):
-                    printed_flipped = self._process_details(details_printed_soup, prefixes[1])
+                    printed_flipped = self._process_details(soup=details_printed_soup, prefix=prefixes[1])
 
                 if not printed_flipped:
                     self.logger.error('Failed to process card %d details printed', card_id)
@@ -312,7 +349,7 @@ class GathererClient:
 
                 # process card details oracle
                 with ExecutionTime('Processing card details oracle'):
-                    oracle = self._process_details(details_oracle_soup)
+                    oracle = self._process_details(soup=details_oracle_soup)
 
                 if not oracle:
                     self.logger.error('Failed to process card %d details oracle', card_id)
@@ -324,7 +361,7 @@ class GathererClient:
 
                 # process card details printed
                 with ExecutionTime('Processing card details printed'):
-                    printed = self._process_details(details_printed_soup)
+                    printed = self._process_details(soup=details_printed_soup)
 
                 if not printed:
                     self.logger.error('Failed to process card %d details printed', card_id)
@@ -429,7 +466,9 @@ class GathererClient:
         with ExecutionTime('Processing page'):
             self.logger.debug('Received page message: %s', body)
 
-            page_id = self._validate_id(body)
+            page = self.validate_page(body)
+            page_id = page['page_id']
+            page_refresh = page['refresh']
 
             if page_id is None:
                 self.logger.error('Failed to process page %d', page_id)
@@ -440,7 +479,7 @@ class GathererClient:
             self.logger.debug('Processing page %d', page_id)
 
             # skip if page was processed
-            if self.is_page_processed(page_id):
+            if not page_refresh and self.is_page_processed(page_id):
                 channel.basic_ack(delivery_tag=method_frame.delivery_tag)
                 return
 
@@ -477,7 +516,7 @@ class GathererClient:
                     self.queue_page(page_id=new_page_id)
 
             # process page - get cards
-            cards = soup.select('.cardItem a')
+            cards = soup.select('.cardTitle a')
             self.logger.debug('Found %d cards', len(cards))
 
             for card in cards:
@@ -487,7 +526,7 @@ class GathererClient:
                     new_card_id = int(match.group('card_id'))
                     data['cards'].append(new_card_id)
 
-                    self.queue_card(card_id=new_card_id)
+                    self.queue_card(card_id=new_card_id, refresh=page_refresh)
 
             # index page
             try:
@@ -518,6 +557,7 @@ class GathererClient:
         colors = self._extract_options(soup, '#ctl00_ctl00_MainContent_Content_colorRow a')
         expansions = self._extract_options(soup, '#ctl00_ctl00_MainContent_Content_setRow a')
         formats = self._extract_options(soup, '#ctl00_ctl00_MainContent_Content_formatRow a')
+        rarities = self._extract_options(soup, '#ctl00_ctl00_MainContent_Content_rarityRow a')
         subtypes = self._extract_options(soup, '#ctl00_ctl00_MainContent_Content_subtypeRow a')
         types = self._extract_options(soup, '#ctl00_ctl00_MainContent_Content_typeRow a')
 
@@ -525,6 +565,7 @@ class GathererClient:
         self.db.delete_colors()
         self.db.delete_expansions()
         self.db.delete_formats()
+        self.db.delete_rarities()
         self.db.delete_subtypes()
         self.db.delete_types()
 
@@ -544,6 +585,10 @@ class GathererClient:
             if not self.db.index_format(item):
                 return False
 
+        for item in rarities:
+            if not self.db.index_rarity(item):
+                return False
+
         for item in subtypes:
             if not self.db.index_subtype(item):
                 return False
@@ -554,17 +599,27 @@ class GathererClient:
 
         return True
 
-    def queue_card(self, card_id: int, queue_name='gatherer_cards'):
+    def queue_card(self, card_id: int, refresh: bool = False, queue_name: str = 'gatherer_cards'):
         self.logger.debug('Queuing card %d', card_id)
 
-        if not self.is_card_processed(card_id=card_id):
-            self.queue.publish(queue_name, str(card_id))
+        if refresh or not self.is_card_processed(card_id=card_id):
+            message = {
+                'card_id': card_id,
+                'refresh': refresh
+            }
 
-    def queue_page(self, page_id: int, queue_name='gatherer_pages'):
+            self.queue.publish(queue_name, json.dumps(message))
+
+    def queue_page(self, page_id: int, refresh: bool = False, queue_name: str = 'gatherer_pages'):
         self.logger.debug('Queuing page %d', page_id)
 
-        if not self.is_page_processed(page_id=page_id):
-            self.queue.publish(queue_name, str(page_id))
+        if refresh or not self.is_page_processed(page_id=page_id):
+            message = {
+                'page_id': page_id,
+                'refresh': refresh
+            }
+
+            self.queue.publish(queue_name, json.dumps(message))
 
     @staticmethod
     def _delete_cache(file_name):
@@ -586,18 +641,12 @@ class GathererClient:
         return '#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent{}_{}Row'.format(prefix, name)
 
     def _extract_attribute(self, soup, selector: str, name: str, data: dict, prefix: str = ''):
-        # self.logger.debug('Searching for attribute "%s" using selector "%s" and prefix "%s"', name, selector, prefix)
-
-        s = '{} .value'.format(self._get_selector(selector, prefix))
-        # self.logger.debug('s: %s', s)
-
-        attribute = soup.select_one(s)
-        # self.logger.debug('attribute: %s', attribute)
+        attribute = soup.select_one('{} .value'.format(self._get_selector(selector, prefix)))
 
         if attribute:
             data[name] = attribute.text.strip()
 
-    def _extract_options(self, soup, selector):
+    def _extract_options(self, soup, selector) -> List:
         values = soup.select(selector)
         names = []
 
@@ -609,7 +658,7 @@ class GathererClient:
 
         return names
 
-    def _process_details(self, soup: BeautifulSoup, prefix: str = ''):
+    def _process_details(self, soup: BeautifulSoup, prefix: str = '', refresh: bool = False):
         data = {}
 
         # extract name
@@ -708,13 +757,13 @@ class GathererClient:
         # extract other sets
         other_sets = []
 
-        for x in soup.select('{} .value a'.format('otherSets', prefix)):
+        for x in soup.select('{} .value a'.format(self._get_selector('otherSets', prefix))):
             match = re.match(r'Details\.aspx\?multiverseid=(?P<number>\d+)', x['href'])
 
             if match:
                 other_set_card_id = int(match.group('number'))
                 other_sets.append(other_set_card_id)
-                self.queue_card(card_id=other_set_card_id)
+                self.queue_card(card_id=other_set_card_id, refresh=refresh)
 
         if other_sets:
             data['other_sets'] = other_sets

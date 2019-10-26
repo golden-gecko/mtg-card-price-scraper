@@ -10,10 +10,10 @@ schemes:
 - "http"
 
 tags:
-  - name: "API"
-  - name: "Gatherer"
-  - name: "Magic"
+  - name: "Auth"
   - name: "Maintenance"
+  - name: "MTG"
+  - name: "Scraper"
 
 paths:
   /healthcheck:
@@ -28,12 +28,139 @@ paths:
         200:
           description: "Success"
 
+  /users:
+    post:
+      tags:
+        - "Auth"
+      summary: "Registers new user"
+      operationId: "routes.users.route_users"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "page"
+          in: "body"
+          schema:
+            type: "object"
+            properties:
+              email:
+                type: "string"
+                example: "john@doe.com"
+              password_hash:
+                type: "string"
+                example: "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb"
+      responses:
+        200:
+          description: "Success"
+
+  /login:
+    delete:
+      tags:
+        - "Auth"
+      summary: "Logs out user"
+      operationId: "routes.auth.route_logout"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Success"
+    post:
+      tags:
+        - "Auth"
+      summary: "Logs in user"
+      operationId: "routes.auth.route_login"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "page"
+          in: "body"
+          schema:
+            type: "object"
+            properties:
+              email:
+                type: "string"
+                example: "john@doe.com"
+              password_hash:
+                type: "string"
+                example: "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb"
+      responses:
+        200:
+          description: "Success"
+
+  /blocks:
+    get:
+      tags:
+        - "MTG"
+      summary: "Return block list"
+      operationId: "routes.blocks.route_blocks"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Success"
+
   /cards:
     get:
       tags:
-        - "API"
+        - "MTG"
       summary: "Return card list"
       operationId: "routes.cards.route_cards"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "block"
+          in: "query"
+          description: "Block name"
+          type: "string"
+        - name: "color"
+          in: "query"
+          description: "Card color"
+          type: "string"
+        - name: "expansion"
+          in: "query"
+          description: "Expansion name"
+          type: "string"
+        - name: "format"
+          in: "query"
+          description: "Format name"
+          type: "string"
+        - name: "name"
+          in: "query"
+          description: "Card name"
+          type: "string"
+        - name: "rarity"
+          in: "query"
+          description: "Card rarity"
+          type: "string"
+        - name: "subtype"
+          in: "query"
+          description: "Card subtype"
+          type: "string"
+        - name: "type"
+          in: "query"
+          description: "Card type"
+          type: "string"
+      responses:
+        200:
+          description: "Success"
+
+  /colors:
+    get:
+      tags:
+        - "MTG"
+      summary: "Return color list"
+      operationId: "routes.colors.route_colors"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Success"
+
+  /expansions:
+    get:
+      tags:
+        - "MTG"
+      summary: "Return expansion list"
+      operationId: "routes.expansions.route_expansions"
       produces:
         - "application/json"
       responses:
@@ -43,7 +170,7 @@ paths:
   /formats:
     get:
       tags:
-        - "API"
+        - "MTG"
       summary: "Return format list"
       operationId: "routes.formats.route_formats"
       produces:
@@ -52,12 +179,24 @@ paths:
         200:
           description: "Success"
 
-  /sets:
+  /rarities:
     get:
       tags:
-        - "API"
-      summary: "Return set list"
-      operationId: "routes.sets.route_sets"
+        - "MTG"
+      summary: "Return rarity list"
+      operationId: "routes.rarities.route_rarities"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Success"
+
+  /subtypes:
+    get:
+      tags:
+        - "MTG"
+      summary: "Return subtype list"
+      operationId: "routes.subtypes.route_subtypes"
       produces:
         - "application/json"
       responses:
@@ -67,7 +206,7 @@ paths:
   /types:
     get:
       tags:
-        - "API"
+        - "MTG"
       summary: "Return type list"
       operationId: "routes.types.route_types"
       produces:
@@ -85,20 +224,20 @@ paths:
       produces:
         - "application/json"
       parameters:
-        - name: page
-          in: body
+        - name: "page"
+          in: "body"
           schema:
-            type: object
+            type: "object"
             properties:
               configuration:
-                type: string
-                example: shop
+                type: "string"
+                example: "shop"
               stage:
-                type: string
-                example: main
+                type: "string"
+                example: "main"
               url:
-                type: string
-                example: https://shop/products
+                type: "string"
+                example: "https://shop/products"
       responses:
         200:
           description: "Success"
@@ -110,20 +249,20 @@ paths:
       produces:
         - "application/json"
       parameters:
-        - name: page
-          in: body
+        - name: "page"
+          in: "body"
           schema:
-            type: object
+            type: "object"
             properties:
               configuration:
-                type: string
-                example: shop
+                type: "string"
+                example: "shop"
               stage:
-                type: string
-                example: main
+                type: "string"
+                example: "main"
               url:
-                type: string
-                example: https://shop/products
+                type: "string"
+                example: "https://shop/products"
       responses:
         200:
           description: "Success"
@@ -143,7 +282,7 @@ paths:
   /scrapers/gatherer/cards/{card_id}:
     post:
       tags:
-        - "Gatherer"
+        - "Scraper"
       summary: "Queue Gatherer card for processing"
       operationId: "routes.scrapers.gatherer.route_cards"
       produces:
@@ -155,6 +294,10 @@ paths:
           required: true
           type: "integer"
           format: "int64"
+        - name: "refresh"
+          in: "query"
+          description: "Refresh Gatherer card"
+          type: "boolean"
       responses:
         200:
           description: "Success"
@@ -162,7 +305,7 @@ paths:
   /scrapers/gatherer/pages/{page_id}:
     post:
       tags:
-        - "Gatherer"
+        - "Scraper"
       summary: "Queue Gatherer page for processing"
       operationId: "routes.scrapers.gatherer.route_pages"
       produces:
@@ -174,6 +317,10 @@ paths:
           required: true
           type: "integer"
           format: "int64"
+        - name: "refresh"
+          in: "query"
+          description: "Refresh Gatherer page"
+          type: "boolean"
       responses:
         200:
           description: "Success"

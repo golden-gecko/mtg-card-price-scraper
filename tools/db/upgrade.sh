@@ -1,6 +1,6 @@
 #!/bin/bash -ex
 
-cd "$(dirname "$0")/../api"
+cd "$(dirname "$0")"
+cd ../../api
 
-~/.local/bin/flask db migrate
-~/.local/bin/flask db upgrade
+PYTHONPATH=.:../common ~/.local/bin/flask db upgrade

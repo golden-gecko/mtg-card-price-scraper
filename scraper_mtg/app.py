@@ -7,7 +7,7 @@ from scrapers.default.db import ScraperDb
 from scrapers.default.queue import ScraperQueue
 
 
-logger = get_logger(__name__)
+logger = get_logger()
 
 
 def process_pages(name, configuration):

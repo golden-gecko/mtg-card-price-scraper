@@ -1,0 +1,32 @@
+﻿<!DOCTYPE html>
+<html lang="pl">
+    {% include 'components/head.html' %}
+
+    <body>
+        {% include 'components/navigation.html' %}
+
+        <div class="container">
+            <div class="row">
+                <div class="col-4 py-3 px-lg-3">
+                    {% include 'components/alert.html' %}
+
+                    <form action="/login" method="post">
+                        <div class="form-group">
+                            <label for="auth-email">Email address</label>
+                            <input type="email" class="form-control" id="auth-email" placeholder="Enter email">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="auth-password">Password</label>
+                            <input type="password" class="form-control" id="auth-password" placeholder="Enter password">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {% include 'components/footer.html' %}
+    </body>
+</html>

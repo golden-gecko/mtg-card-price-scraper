@@ -1,4 +1,4 @@
-import http
+from flask import request
 
 from helpers import create_response
 from scrapers.gatherer.client import GathererClient
@@ -13,13 +13,9 @@ def route_cards(card_id):
     queue.connect()
 
     gatherer = GathererClient(db=db, queue=queue)
+    gatherer.queue_card(card_id=card_id, refresh=request.args.get('refresh', default=False, type=bool))
 
-    if gatherer.queue_card(card_id=card_id):
-        code = http.HTTPStatus.OK
-    else:
-        code = http.HTTPStatus.INTERNAL_SERVER_ERROR
-
-    return create_response(code=code)
+    return create_response()
 
 
 def route_pages(page_id):
@@ -29,10 +25,6 @@ def route_pages(page_id):
     queue.connect()
 
     gatherer = GathererClient(db=db, queue=queue)
+    gatherer.queue_page(page_id=page_id, refresh=request.args.get('refresh', default=False, type=bool))
 
-    if gatherer.queue_page(page_id=page_id):
-        code = http.HTTPStatus.OK
-    else:
-        code = http.HTTPStatus.INTERNAL_SERVER_ERROR
-
-    return create_response(code=code)
+    return create_response()

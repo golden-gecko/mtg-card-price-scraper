@@ -6,7 +6,7 @@ from scrapers.gatherer.db import GathererDb
 from scrapers.gatherer.queue import GathererQueue
 
 
-logger = get_logger(__name__)
+logger = get_logger()
 
 
 def process_search():

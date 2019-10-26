@@ -2,11 +2,11 @@ from helpers import create_response
 from scrapers.gatherer.db import GathererDb
 
 
-def route_sets():
+def route_blocks():
     db = GathererDb(host='mongo')
 
     data = {
-        'sets': [x for x in db.get_sets()]
+        'blocks': db.get_blocks()
     }
 
     return create_response(data=data)

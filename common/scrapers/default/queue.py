@@ -5,7 +5,7 @@ from log import get_logger
 
 class ScraperQueue:
     def __init__(self, host):
-        self.logger = get_logger(__name__)
+        self.logger = get_logger()
 
         self.connection_parameters = pika.ConnectionParameters(host)
         self.basic_properties = pika.BasicProperties(delivery_mode=2)

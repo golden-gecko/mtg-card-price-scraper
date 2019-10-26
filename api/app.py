@@ -3,11 +3,12 @@ import http
 import os
 
 from flask_cors import CORS
+from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
-from flask_sqlalchemy import SQLAlchemy
 
 from config import Config
 from helpers import create_response
+from models import db
 
 
 def route_error(error):
@@ -15,6 +16,7 @@ def route_error(error):
 
 
 connexion_app = connexion.App(__name__, specification_dir=os.path.abspath(os.path.dirname(__file__)))
+connexion_app.add_api('api_v1.yaml', validate_responses=True)
 
 app = connexion_app.app
 app.config.from_object(Config)
@@ -33,14 +35,11 @@ codes = [
 for code in codes:
     app.register_error_handler(code, route_error)
 
-db = SQLAlchemy(app)
-
+db.init_app(app)
+jwt = JWTManager(app)
 migrate = Migrate(app, db)
 
-connexion_app.add_api('api_v1.yaml')
+CORS(app, resources={'/*': {'origins': '*'}})
 
-CORS(app, resources={
-    '/*': {
-        'origins': '*'
-    }
-})
+
+from models import Deck, User
