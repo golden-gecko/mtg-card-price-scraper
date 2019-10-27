@@ -28,8 +28,6 @@ def route_register():
         variables['message'] = message
         variables['data'] = data
 
-        logger.debug('variables: %s', variables)
-
         if status:
             data = {
                 'email': request.form.get('email'),

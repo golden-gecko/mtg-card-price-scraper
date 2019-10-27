@@ -14,6 +14,7 @@ tags:
   - name: "Maintenance"
   - name: "MTG"
   - name: "Scraper"
+  - name: "User"
 
 paths:
   /healthcheck:
@@ -28,12 +29,22 @@ paths:
         200:
           description: "Success"
 
-  /users:
+  /auth:
+    delete:
+      tags:
+        - "Auth"
+      summary: "Logs out user"
+      operationId: "routes.auth.route_logout"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Success"
     post:
       tags:
         - "Auth"
-      summary: "Registers new user"
-      operationId: "routes.users.route_users"
+      summary: "Logs in user"
+      operationId: "routes.auth.route_login"
       produces:
         - "application/json"
       parameters:
@@ -52,22 +63,12 @@ paths:
         200:
           description: "Success"
 
-  /login:
-    delete:
-      tags:
-        - "Auth"
-      summary: "Logs out user"
-      operationId: "routes.auth.route_logout"
-      produces:
-        - "application/json"
-      responses:
-        200:
-          description: "Success"
+  /users:
     post:
       tags:
-        - "Auth"
-      summary: "Logs in user"
-      operationId: "routes.auth.route_login"
+        - "User"
+      summary: "Registers new user"
+      operationId: "routes.users.route_users"
       produces:
         - "application/json"
       parameters:

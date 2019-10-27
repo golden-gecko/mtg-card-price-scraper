@@ -21,24 +21,30 @@ def create_response(code: int = http.HTTPStatus.OK, message: str = '', data=None
     return jsonify(response), code
 
 
-def send_get(url: str, params=None) -> Response:
+def send_get(url: str, headers=None, params=None) -> Response:
     logger = get_logger()
 
     logger.debug('Sending GET to %s...', url)
 
-    response = requests.get(url=url, params=params)
+    response = requests.get(url=url, headers=headers, params=params)
 
     logger.debug('Received %d %s', response.status_code, response.text)
 
     return response
 
 
-def send_post(url: str, json=None, params=None) -> Response:
+def send_post(url: str, headers=None, json=None, params=None) -> Response:
     logger = get_logger()
 
     logger.debug('Sending POST to %s...', url)
 
-    response = requests.post(url=url, json=json, params=params)
+    if json:
+        if not headers:
+            headers = {}
+
+        headers['Content-Type'] = 'application/json'
+
+    response = requests.post(url=url, headers=headers, json=json, params=params)
 
     logger.debug('Received %d %s', response.status_code, response.text)
 
