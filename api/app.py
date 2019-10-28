@@ -39,6 +39,31 @@ db.init_app(app)
 jwt = JWTManager(app)
 migrate = Migrate(app, db)
 
+
+@jwt.expired_token_loader
+def expired_token_loader_callback():
+    return create_response(
+        code=http.HTTPStatus.UNAUTHORIZED,
+        message='Token has expired'
+    )
+
+
+@jwt.invalid_token_loader
+def expired_token_loader_callback():
+    return create_response(
+        code=http.HTTPStatus.UNPROCESSABLE_ENTITY,
+        message='Token is invalid'
+    )
+
+
+@jwt.revoked_token_loader
+def expired_token_loader_callback():
+    return create_response(
+        code=http.HTTPStatus.UNAUTHORIZED,
+        message='Token has been revoked'
+    )
+
+
 CORS(app, resources={'/*': {'origins': '*'}})
 
 
