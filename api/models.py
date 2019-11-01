@@ -18,6 +18,17 @@ class Deck(db.Model):
         return '<Deck name={}>'.format(self.name)
 
 
+class Tokens(db.Model):
+    __tablename__ = 'tokens'
+
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=lambda: str(uuid.uuid4()))
+    token = db.Column(db.String(8192), index=True, nullable=False)
+    owner_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
+
+    def __repr__(self):
+        return '<Deck name={}>'.format(self.name)
+
+
 class User(db.Model):
     __tablename__ = 'users'
 

@@ -1,5 +1,4 @@
 from pymongo import ASCENDING, MongoClient
-from typing import List
 
 from log import get_logger
 
@@ -41,16 +40,13 @@ class GathererDb:
     def delete_types(self):
         return self.db.types.delete_many({})
 
-    def get_blocks(self) -> List:
+    def get_blocks(self) -> list:
         return list(self.db.blocks.find({}, {'_id': 0}).sort('name', ASCENDING))
 
-    def get_cards(self, name: str = '', page: int = 0, limit: int = 10) -> List:
+    def get_card(self, card_id: int) -> dict:
         query = {
-            'main': True
+            'card_id': card_id
         }
-
-        if name:
-            query['oracle.name'] = name
 
         projection = {
             '_id': 0,
@@ -61,29 +57,78 @@ class GathererDb:
             'oracle.type': 1
         }
 
+        return self.db.cards.find_one(query, projection)
+
+    def get_cards(self, params=None, page: int = 0, limit: int = 10) -> list:
+        query = {
+        }
+
+        if 'all_versions' in params and params['all_versions']:
+            query['main'] = True
+
+        """
+        if 'block' in params and params['block']:
+            query['oracle.block'] = params['block']
+
+        if 'color' in params and params['color']:
+            query['oracle.color'] = params['color']
+        """
+
+        if 'expansion' in params and params['expansion']:
+            query['oracle.set'] = params['expansion']
+
+        """
+        if 'format' in params and params['format']:
+            query['oracle.format'] = params['format']
+        """
+
+        if 'name' in params and params['name']:
+            query['oracle.name'] = params['name']
+
+        if 'rarity' in params and params['rarity']:
+            query['oracle.rarity'] = params['rarity']
+
+        if 'type' in params and params['type']:
+            query['oracle.type'] = params['type']
+
+        """
+        if 'subtype' in params and params['subtype']:
+            query['oracle.subtype'] = params['subtype']
+        """
+
+        projection = {
+            '_id': 0,
+            'card_id': 1,
+            'oracle': 1
+        }
+
+        self.logger.debug('query: %s', query)
+        self.logger.debug('projection: %s', projection)
+
         return list(
-            self.db.cards.find(query, projection)
+            self.db.cards
+                .find(query, projection)
                 .sort('name', ASCENDING)
                 .skip(page * limit)
                 .limit(limit)
         )
 
-    def get_colors(self) -> List:
+    def get_colors(self) -> list:
         return list(self.db.colors.find({}, {'_id': 0}).sort('name', ASCENDING))
 
-    def get_expansions(self) -> List:
+    def get_expansions(self) -> list:
         return list(self.db.expansions.find({}, {'_id': 0}).sort('name', ASCENDING))
 
-    def get_formats(self) -> List:
+    def get_formats(self) -> list:
         return list(self.db.formats.find({}, {'_id': 0}).sort('name', ASCENDING))
 
-    def get_rarities(self) -> List:
+    def get_rarities(self) -> list:
         return list(self.db.rarities.find({}, {'_id': 0}).sort('name', ASCENDING))
 
-    def get_subtypes(self) -> List:
+    def get_subtypes(self) -> list:
         return list(self.db.subtypes.find({}, {'_id': 0}).sort('name', ASCENDING))
 
-    def get_types(self) -> List:
+    def get_types(self) -> list:
         return list(self.db.types.find({}, {'_id': 0}).sort('name', ASCENDING))
 
     def index_block(self, data) -> bool:

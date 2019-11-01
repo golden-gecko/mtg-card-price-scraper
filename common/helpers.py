@@ -27,6 +27,8 @@ def make_url(host: str, params: [list, str, None] = None) -> str:
         if not isinstance(params, list):
             params = [params]
 
+        params = [str(x) for x in params]
+
     return urljoin(host, '/'.join(params))
 
 

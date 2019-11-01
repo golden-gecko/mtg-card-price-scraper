@@ -147,9 +147,15 @@
                         {% if cards %}
                             {% for card in cards %}
                                 <div class="col-sm-3 search-item">
-                                    <p class="name">{{ card.oracle.name }}</p>
+                                    <p class="name">
+                                        <a href="/card/{{ card.card_id }}" title="{{ card.oracle.name }}">
+                                            {{ card.oracle.name }}
+                                        </a>
+                                    </p>
                                     <p class="type">{{ card.oracle.type }}</p>
-                                    <img class="image-small" src="http://192.168.0.162:8080/cards/images/{{ card.card_id }}.png">
+                                    <a href="/card/{{ card.card_id }}" title="{{ card.oracle.name }}">
+                                        <img class="image-small" src="http://192.168.0.162:8080/cards/images/{{ card.card_id }}.png">
+                                    </a>
                                 </div>
                             {% endfor %}
                         {% endif %}
@@ -222,11 +228,22 @@
                         that.search_results.empty();
 
                         $.each(json['data']['cards'], function(k, v) {
+                            var a = $('<a>')
+                                .attr('href', ['card', v['card_id']].join('/'))
+                                .attr('title', v['oracle']['name']);
+
+                            var name = $('<p class="name">');
+                            var type = $('<p class="type">').text(v['oracle']['type']);
+                            var image = $('<img class="image-small">')
+                                .attr('src', that.static_url + v['card_id'].toString() + '.png');
+
                             var card = $('<div class="col-sm-3 search-item">');
 
-                            $('<p class="name">').text(v['oracle']['name']).appendTo(card);
-                            $('<p class="type">').text(v['oracle']['type']).appendTo(card);
-                            $('<img class="image-small">').attr('src', that.static_url + v['card_id'].toString() + '.png').appendTo(card);
+                            a.clone().text(v['oracle']['name']).appendTo(name);
+                            name.appendTo(card);
+                            type.appendTo(card);
+                            image.appendTo(a);
+                            a.appendTo(card);
 
                             card.appendTo(that.search_results);
                         });
