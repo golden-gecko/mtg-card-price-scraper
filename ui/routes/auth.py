@@ -3,12 +3,11 @@ import hashlib
 from flask import make_response, redirect, render_template, request
 from flask_login import current_user, login_user, logout_user
 from http import HTTPStatus
-from urllib.parse import urljoin
 
 import config
 
 from app import app, User
-from helpers import send_post
+from helpers import make_url, send_delete, send_post
 from log import get_logger
 from schemas import validate_user
 
@@ -40,7 +39,7 @@ def route_login():
                 'password_hash': hashlib.sha256(request.form.get('password').encode('utf-8')).hexdigest()
             }
 
-            api_response = send_post(urljoin(config.API_URL, 'auth'), json=data)
+            api_response = send_post(make_url(config.API_URL, 'auth'), json=data)
 
             if api_response.status_code == HTTPStatus.OK:
                 variables['status'] = True
@@ -70,7 +69,7 @@ def route_logout():
         'Authorization': 'Bearer {}'.format(current_user.get_token())
     }
 
-    api_response = send_post(urljoin(config.API_URL, 'auth'), headers=headers)
+    api_response = send_delete(make_url(config.API_URL, 'auth'), headers=headers)
 
     variables = {
         'active_page': 'profile'
