@@ -1,7 +1,6 @@
-import http
-
 from flask import request
 from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, jwt_refresh_token_required, jwt_required
+from http import HTTPStatus
 from sqlalchemy import and_
 
 from helpers import create_response
@@ -13,7 +12,7 @@ def route_login():
     status, message, data = validate_user(request.get_json())
 
     if not status:
-        return create_response(http.HTTPStatus.BAD_REQUEST, message=message)
+        return create_response(HTTPStatus.BAD_REQUEST, message=message)
 
     user = db.session.query(User).filter(and_(
         User.email == data['email'],
@@ -21,7 +20,7 @@ def route_login():
     )).one()
 
     if not user:
-        return create_response(http.HTTPStatus.UNAUTHORIZED)
+        return create_response(HTTPStatus.UNAUTHORIZED)
 
     response = {
         'access_token': create_access_token(identity=user.id),

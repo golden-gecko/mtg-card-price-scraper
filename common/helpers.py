@@ -1,13 +1,13 @@
-import http
 import requests
 
+from http import HTTPStatus
 from requests import Response
 
 from flask import jsonify
 from log import get_logger
 
 
-def create_response(code: int = http.HTTPStatus.OK, message: str = '', data=None) -> tuple:
+def create_response(code: int = HTTPStatus.OK, message: str = '', data=None) -> tuple:
     response = {
         'code': code
     }

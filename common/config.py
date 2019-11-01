@@ -16,12 +16,12 @@ DATABASE_USER = 'cenykart'
 
 
 class Config:
-    JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(minutes=1)
+    JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(days=1)
     # JWT_BLACKLIST_ENABLED = True
     # JWT_BLACKLIST_TOKEN_CHECKS = ['access', 'refresh']
     JWT_SECRET_KEY = '3e23e8160039594a3389'
 
-    SECRET_KEY = '252f10c83610ebca1a05'
+    SECRET_KEY = '3e23e8160039594a3389'
 
     SQLALCHEMY_DATABASE_URI = '{}://{}:{}@{}/{}'.format(DATABASE_DRIVER, DATABASE_USER, DATABASE_PASSWORD, DATABASE_HOST, DATABASE_NAME)
     SQLALCHEMY_ECHO = True

@@ -1,7 +1,7 @@
 import json
-import http
 
 from flask import request
+from http import HTTPStatus
 
 from helpers import create_response
 from log import get_logger
@@ -21,7 +21,7 @@ def route_pages_post():
     logger.debug(page)
 
     if page.keys() != {'configuration', 'stage', 'url'}:
-        return create_response(code=http.HTTPStatus.BAD_REQUEST)
+        return create_response(code=HTTPStatus.BAD_REQUEST)
 
     queue.publish('scraper_{}'.format(page['configuration']), json.dumps(page))
 
@@ -37,7 +37,7 @@ def route_pages_put():
     logger.debug(page)
 
     if page.keys() != {'configuration', 'stage', 'url'}:
-        return create_response(code=http.HTTPStatus.BAD_REQUEST)
+        return create_response(code=HTTPStatus.BAD_REQUEST)
 
     page['refresh'] = True
 

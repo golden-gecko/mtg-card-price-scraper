@@ -1,6 +1,5 @@
-import http
-
 from flask import render_template, request
+from http import HTTPStatus
 from urllib.parse import urljoin
 
 import config
@@ -10,9 +9,9 @@ from helpers import send_get
 
 
 def get_items(name, params=None):
-    response = send_get(urljoin(config.API_URL, name), params=params)
+    response = send_get(urljoin(config.API_URL, '/'.join(['mtg', name])), params=params)
 
-    if response.status_code != http.HTTPStatus.OK:
+    if response.status_code != HTTPStatus.OK:
         return None
 
     response = response.json()
