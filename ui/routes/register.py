@@ -1,21 +1,21 @@
 import hashlib
 
-from flask import redirect, render_template, request
+from flask import Blueprint, redirect, render_template, request
 from flask_login import current_user
 from http import HTTPStatus
 
 import config
 
-from app import app
 from helpers import make_url, send_post
 from log import get_logger
 from schemas import validate_user
 
 
+blueprint = Blueprint('register', __name__)
 logger = get_logger()
 
 
-@app.route('/register', methods=['GET', 'POST'])
+@blueprint.route('/register', methods=['GET', 'POST'])
 def route_register():
     logger.debug('current_user: %s', current_user)
 

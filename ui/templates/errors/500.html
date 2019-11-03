@@ -1,19 +1,13 @@
-﻿<!DOCTYPE html>
-<html lang="pl">
-    {% include 'components/head.html' %}
+﻿{% extends "layouts/base.html" %}
 
-    <body>
-        {% include 'components/navigation.html' %}
-        {% include 'components/alert.html' %}
+{% block title %}Internal Server Error{% endblock %}
 
-        <div class="container">
-            <div class="row">
-                <div class="col-12 py-3 px-lg-3">
-                    <h1>500 - Internal Server Error</h1>
-                </div>
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-12 py-3 px-lg-3">
+                <h1>500 - Internal Server Error</h1>
             </div>
         </div>
-
-        {% include 'components/footer.html' %}
-    </body>
-</html>
+    </div>
+{% endblock %}

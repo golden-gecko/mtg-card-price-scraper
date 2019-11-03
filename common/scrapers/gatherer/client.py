@@ -24,6 +24,8 @@ class GathererClient:
     card_languages_url = 'http://gatherer.wizards.com/Pages/Card/Languages.aspx?multiverseid={card_id}'
     card_printings_url = 'http://gatherer.wizards.com/Pages/Card/Printings.aspx?multiverseid={card_id}'
 
+    symbol_url = 'https://gatherer.wizards.com/Handlers/Image.ashx?size=medium&name={symbol}&type=symbol'
+
     def __init__(self, db: GathererDb, queue: GathererQueue):
         self.logger = get_logger()
 
@@ -597,6 +599,24 @@ class GathererClient:
             if not self.db.index_type(item):
                 return False
 
+        # download symbols
+        symbols = {
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16',
+            'B', 'G', 'R', 'U', 'W',
+            'BG', 'BR',
+            'GU', 'GW',
+            'RG', 'RW',
+            'UB', 'UR',
+            'WB', 'WU',
+            'X'
+        }
+
+        for symbol in symbols:
+            image_file_name = os.path.join('/', 'data', 'symbols', '{}.png'.format(symbol))
+
+            if not download_and_save_image(self.symbol_url.format(symbol=symbol), image_file_name):
+                self.logger.error('Downloading symbol %s failed', symbol)
+
         return True
 
     def queue_card(self, card_id: int, refresh: bool = False, queue_name: str = 'gatherer_cards'):
@@ -685,6 +705,18 @@ class GathererClient:
 
         # extract type
         self._extract_attribute(soup, 'type', 'type', data, prefix)
+
+        # extract subtypes
+        if 'type' in data:
+            parts = data['type'].split('—')
+
+            if len(parts) != 2:
+                self.logger.warning('Unsupported type format: %s', data['type'])
+            else:
+                data['type'] = parts[0].strip()
+                data['subtypes'] = [x.strip() for x in parts[1].split(' ') if x.strip()]
+        else:
+            self.logger.warning('Type not found')
 
         # extract text
         text = []

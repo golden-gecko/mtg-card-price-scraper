@@ -1,10 +1,12 @@
-from flask import render_template, request
+from flask import Blueprint, render_template, request
 from http import HTTPStatus
 
 import config
 
-from app import app
 from helpers import make_url, send_get
+
+
+blueprint = Blueprint('search', __name__)
 
 
 def get_items(name, params=None):
@@ -26,7 +28,7 @@ def get_items(name, params=None):
     return response[name]
 
 
-@app.route('/search')
+@blueprint.route('/search')
 def route_search():
     params = {
         'name': request.args.get('name', default='')

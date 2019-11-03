@@ -1,261 +1,258 @@
-﻿<!DOCTYPE html>
-<html lang="pl">
-    {% include 'components/head.html' %}
+﻿{% extends "layouts/base.html" %}
 
-    <body>
-        {% include 'components/navigation.html' %}
+{% block title %}Search{% endblock %}
 
-        <div class="container">
-            <div class="row">
-                <div class="col-3 py-3 px-lg-3">
-                    {% include 'components/alert.html' %}
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-3 py-3 px-lg-3">
+                {% include 'components/alert.html' %}
 
-                    <form id="search-form">
-                        <div class="form-group row">
-                            <label for="search-name" class="col col-form-label">Name</label>
-                            <div class="col">
-                                <input id="search-name" class="form-control" name="name" placeholder="Enter name">
-                            </div>
+                <form id="search-form">
+                    <div class="form-group row">
+                        <label for="search-name" class="col col-form-label">Name</label>
+                        <div class="col">
+                            <input id="search-name" class="form-control" name="name" placeholder="Enter name">
                         </div>
-
-                        <div class="form-group row">
-                            <label for="search-block" class="col col-form-label">Block</label>
-                            <div class="col">
-                                <select id="search-block" class="form-control"  name="block">
-                                    <option value=""></option>
-
-                                    {% if blocks %}
-                                        {% for block in blocks %}
-                                            <option value="{{ block.name }}">{{ block.name }}</option>
-                                        {% endfor %}
-                                    {% endif %}
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="search-color" class="col col-form-label">Color</label>
-                            <div class="col">
-                                <select id="search-color" class="form-control"  name="color">
-                                    <option value=""></option>
-
-                                    {% if colors %}
-                                        {% for color in colors %}
-                                            <option value="{{ color.name }}">{{ color.name }}</option>
-                                        {% endfor %}
-                                    {% endif %}
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="search-expansion" class="col col-form-label">Expansion</label>
-                            <div class="col">
-                                <select id="search-expansion" class="form-control" name="expansion">
-                                    <option value=""></option>
-
-                                    {% if expansions %}
-                                        {% for expansion in expansions %}
-                                            <option value="{{ expansion.name }}">{{ expansion.name }}</option>
-                                        {% endfor %}
-                                    {% endif %}
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="search-format" class="col col-form-label">Format</label>
-                            <div class="col">
-                                <select id="search-format" class="form-control" name="format">
-                                    <option value=""></option>
-
-                                    {% if formats %}
-                                        {% for format in formats %}
-                                            <option value="{{ format.name }}">{{ format.name }}</option>
-                                        {% endfor %}
-                                    {% endif %}
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="search-rarity" class="col col-form-label">Rarity</label>
-                            <div class="col">
-                                <select id="search-rarity" class="form-control"  name="rarity">
-                                    <option value=""></option>
-
-                                    {% if rarities %}
-                                        {% for rarity in rarities %}
-                                            <option value="{{ rarity.name }}">{{ rarity.name }}</option>
-                                        {% endfor %}
-                                    {% endif %}
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="search-type" class="col col-form-label">Type</label>
-                            <div class="col">
-                                <select id="search-type" class="form-control"  name="type">
-                                    <option value=""></option>
-
-                                    {% if types %}
-                                        {% for type in types %}
-                                            <option value="{{ type.name }}">{{ type.name }}</option>
-                                        {% endfor %}
-                                    {% endif %}
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="search-subtype" class="col col-form-label">Subtype</label>
-                            <div class="col">
-                                <select id="search-subtype" class="form-control"  name="subtype">
-                                    <option value=""></option>
-
-                                    {% if subtypes %}
-                                        {% for subtype in subtypes %}
-                                            <option value="{{ subtype.name }}">{{ subtype.name }}</option>
-                                        {% endfor %}
-                                    {% endif %}
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="search-limit" class="col col-form-label">Per page</label>
-                            <div class="col">
-                                <select id="search-limit" class="form-control"  name="limit">
-                                    <option value="12">12</option>
-                                    <option value="24">24</option>
-                                    <option value="48">48</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <div class="col">
-                                <button id="search-button" type="submit" class="btn btn-primary">Search</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="col-9 py-3 px-lg-3">
-                    <div id="search-results" class="row">
-                        {% if cards %}
-                            {% for card in cards %}
-                                <div class="col-sm-3 search-item">
-                                    <p class="name">
-                                        <a href="/card/{{ card.card_id }}" title="{{ card.oracle.name }}">
-                                            {{ card.oracle.name }}
-                                        </a>
-                                    </p>
-                                    <p class="type">{{ card.oracle.type }}</p>
-                                    <a href="/card/{{ card.card_id }}" title="{{ card.oracle.name }}">
-                                        <img class="image-small" src="http://192.168.0.162:8080/cards/images/{{ card.card_id }}.png">
-                                    </a>
-                                </div>
-                            {% endfor %}
-                        {% endif %}
                     </div>
+
+                    <div class="form-group row">
+                        <label for="search-block" class="col col-form-label">Block</label>
+                        <div class="col">
+                            <select id="search-block" class="form-control"  name="block">
+                                <option value=""></option>
+
+                                {% if blocks %}
+                                    {% for block in blocks %}
+                                        <option value="{{ block.name }}">{{ block.name }}</option>
+                                    {% endfor %}
+                                {% endif %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="search-color" class="col col-form-label">Color</label>
+                        <div class="col">
+                            <select id="search-color" class="form-control"  name="color">
+                                <option value=""></option>
+
+                                {% if colors %}
+                                    {% for color in colors %}
+                                        <option value="{{ color.name }}">{{ color.name }}</option>
+                                    {% endfor %}
+                                {% endif %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="search-expansion" class="col col-form-label">Expansion</label>
+                        <div class="col">
+                            <select id="search-expansion" class="form-control" name="expansion">
+                                <option value=""></option>
+
+                                {% if expansions %}
+                                    {% for expansion in expansions %}
+                                        <option value="{{ expansion.name }}">{{ expansion.name }}</option>
+                                    {% endfor %}
+                                {% endif %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="search-format" class="col col-form-label">Format</label>
+                        <div class="col">
+                            <select id="search-format" class="form-control" name="format">
+                                <option value=""></option>
+
+                                {% if formats %}
+                                    {% for format in formats %}
+                                        <option value="{{ format.name }}">{{ format.name }}</option>
+                                    {% endfor %}
+                                {% endif %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="search-rarity" class="col col-form-label">Rarity</label>
+                        <div class="col">
+                            <select id="search-rarity" class="form-control"  name="rarity">
+                                <option value=""></option>
+
+                                {% if rarities %}
+                                    {% for rarity in rarities %}
+                                        <option value="{{ rarity.name }}">{{ rarity.name }}</option>
+                                    {% endfor %}
+                                {% endif %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="search-type" class="col col-form-label">Type</label>
+                        <div class="col">
+                            <select id="search-type" class="form-control"  name="type">
+                                <option value=""></option>
+
+                                {% if types %}
+                                    {% for type in types %}
+                                        <option value="{{ type.name }}">{{ type.name }}</option>
+                                    {% endfor %}
+                                {% endif %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="search-subtype" class="col col-form-label">Subtype</label>
+                        <div class="col">
+                            <select id="search-subtype" class="form-control"  name="subtype">
+                                <option value=""></option>
+
+                                {% if subtypes %}
+                                    {% for subtype in subtypes %}
+                                        <option value="{{ subtype.name }}">{{ subtype.name }}</option>
+                                    {% endfor %}
+                                {% endif %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="search-limit" class="col col-form-label">Per page</label>
+                        <div class="col">
+                            <select id="search-limit" class="form-control"  name="limit">
+                                <option value="12">12</option>
+                                <option value="24">24</option>
+                                <option value="48">48</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <div class="col">
+                            <button id="search-button" type="submit" class="btn btn-primary">Search</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="col-9 py-3 px-lg-3">
+                <div id="search-results" class="row">
+                    {% if cards %}
+                        {% for card in cards %}
+                            <div class="col-sm-3 search-item">
+                                <p class="name">
+                                    <a href="/card/{{ card.card_id }}" title="{{ card.oracle.name }}">
+                                        {{ card.oracle.name }}
+                                    </a>
+                                </p>
+
+                                <p class="type">{{ card.oracle.type }}</p>
+
+                                <a href="/card/{{ card.card_id }}" title="{{ card.oracle.name }}">
+                                    <img class="image-small" src="http://192.168.0.162:8080/cards/images/{{ card.card_id }}.png" title="{{ card.oracle.name }}">
+                                </a>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
                 </div>
             </div>
         </div>
+    </div>
 
-        {% include 'components/footer.html' %}
+    <script>
+        class Search {
+            constructor() {
+                console.log('SearchForm.constructor()');
 
-        <script>
-            class Search {
-                constructor() {
-                    console.log('SearchForm.constructor()');
+                this.api_url = 'http://192.168.0.162:8000/v1/'
+                this.static_url = 'http://192.168.0.162:8080/cards/images/'
 
-                    this.api_url = 'http://192.168.0.162:8000/v1/'
-                    this.static_url = 'http://192.168.0.162:8080/cards/images/'
+                this.search_form = $('#search-form');
+                this.search_block = this.search_form.find('#search-block');
+                this.search_color = this.search_form.find('#search-color');
+                this.search_expansion = this.search_form.find('#search-expansion');
+                this.search_format = this.search_form.find('#search-format');
+                this.search_rarity = this.search_form.find('#search-rarity');
+                this.search_name = this.search_form.find('#search-name');
+                this.search_subtype = this.search_form.find('#search-subtype');
+                this.search_type = this.search_form.find('#search-type');
+                this.search_button = this.search_form.find('#search-button');
+                this.search_results = $('#search-results');
 
-                    this.search_form = $('#search-form');
-                    this.search_block = this.search_form.find('#search-block');
-                    this.search_color = this.search_form.find('#search-color');
-                    this.search_expansion = this.search_form.find('#search-expansion');
-                    this.search_format = this.search_form.find('#search-format');
-                    this.search_rarity = this.search_form.find('#search-rarity');
-                    this.search_name = this.search_form.find('#search-name');
-                    this.search_subtype = this.search_form.find('#search-subtype');
-                    this.search_type = this.search_form.find('#search-type');
-                    this.search_button = this.search_form.find('#search-button');
-                    this.search_results = $('#search-results');
+                var that = this;
 
-                    var that = this;
+                this.search_button.click(function(e) {
+                    e.preventDefault();
 
-                    this.search_button.click(function(e) {
-                        e.preventDefault();
+                    that.search();
+                });
 
-                        that.search();
-                    });
+                // this.init_select('blocks', this.search_block);
+                // this.init_select('colors', this.search_color);
+                // this.init_select('expansions', this.search_expansion);
+                // this.init_select('formats', this.search_format);
+                // this.init_select('rarities', this.search_rarity);
+                // this.init_select('subtypes', this.search_subtype);
+                // this.init_select('types', this.search_type);
 
-                    // this.init_select('blocks', this.search_block);
-                    // this.init_select('colors', this.search_color);
-                    // this.init_select('expansions', this.search_expansion);
-                    // this.init_select('formats', this.search_format);
-                    // this.init_select('rarities', this.search_rarity);
-                    // this.init_select('subtypes', this.search_subtype);
-                    // this.init_select('types', this.search_type);
-
-                    // this.search();
-                }
-
-                init_select(type, element) {
-                    console.log('SearchForm.init_select()');
-
-                    $('<option>').appendTo(element);
-
-                    $.getJSON(this.api_url + ['mtg', type].join('/'), function(json) {
-                        $.each(json['data'][type], function(k, v) {
-                            var option = $('<option>');
-
-                            option.val(v['name']);
-                            option.text(v['name']);
-                            option.appendTo(element);
-                        });
-                    });
-                }
-
-                search() {
-                    var that = this;
-
-                    $.getJSON(that.api_url + ['mtg', 'cards'].join('/') + '?' + that.search_form.serialize(), function(json) {
-                        that.search_results.empty();
-
-                        $.each(json['data']['cards'], function(k, v) {
-                            var a = $('<a>')
-                                .attr('href', ['card', v['card_id']].join('/'))
-                                .attr('title', v['oracle']['name']);
-
-                            var name = $('<p class="name">');
-                            var type = $('<p class="type">').text(v['oracle']['type']);
-                            var image = $('<img class="image-small">')
-                                .attr('src', that.static_url + v['card_id'].toString() + '.png');
-
-                            var card = $('<div class="col-sm-3 search-item">');
-
-                            a.clone().text(v['oracle']['name']).appendTo(name);
-                            name.appendTo(card);
-                            type.appendTo(card);
-                            image.appendTo(a);
-                            a.appendTo(card);
-
-                            card.appendTo(that.search_results);
-                        });
-                    });
-                }
+                // this.search();
             }
 
-            $.ajaxSetup({
-                cache: false
-            });
+            init_select(type, element) {
+                console.log('SearchForm.init_select()');
 
-            var search = new Search();
-        </script>
-    </body>
-</html>
+                $('<option>').appendTo(element);
+
+                $.getJSON(this.api_url + ['mtg', type].join('/'), function(json) {
+                    $.each(json['data'][type], function(k, v) {
+                        var option = $('<option>');
+
+                        option.val(v['name']);
+                        option.text(v['name']);
+                        option.appendTo(element);
+                    });
+                });
+            }
+
+            search() {
+                var that = this;
+
+                $.getJSON(that.api_url + ['mtg', 'cards'].join('/') + '?' + that.search_form.serialize(), function(json) {
+                    that.search_results.empty();
+
+                    $.each(json['data']['cards'], function(k, v) {
+                        var a = $('<a>')
+                            .attr('href', ['card', v['card_id']].join('/'))
+                            .attr('title', v['oracle']['name']);
+
+                        var name = $('<p class="name">');
+                        var type = $('<p class="type">').text(v['oracle']['type']);
+                        var image = $('<img class="image-small">')
+                            .attr('src', that.static_url + v['card_id'].toString() + '.png');
+
+                        var card = $('<div class="col-sm-3 search-item">');
+
+                        a.clone().text(v['oracle']['name']).appendTo(name);
+                        name.appendTo(card);
+                        type.appendTo(card);
+                        image.appendTo(a);
+                        a.appendTo(card);
+
+                        card.appendTo(that.search_results);
+                    });
+                });
+            }
+        }
+
+        $.ajaxSetup({
+            cache: false
+        });
+
+        var search = new Search();
+    </script>
+{% endblock %}

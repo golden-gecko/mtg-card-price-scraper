@@ -1,17 +1,17 @@
-from flask import abort, render_template
+from flask import abort, Blueprint, render_template
 from http import HTTPStatus
 
 import config
 
-from app import app
 from helpers import make_url, send_get
 from log import get_logger
 
 
+blueprint = Blueprint('card', __name__)
 logger = get_logger()
 
 
-@app.route('/card/<int:card_id>')
+@blueprint.route('/card/<int:card_id>')
 def route_card(card_id: int):
     response = send_get(make_url(config.API_URL, ['mtg', 'cards', card_id]))
 
