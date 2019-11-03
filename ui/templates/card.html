@@ -20,7 +20,7 @@
                             <td class="key">Mana Cost</td>
                             <td class="value">
                                 {% for mana in card.oracle.mana %}
-                                    {{ symbol_image(mana) }}
+                                    {{ search_url('color', mana, symbol_image(mana)) }}
                                 {% endfor %}
                             </td>
                         </tr>
@@ -29,7 +29,7 @@
                     {% if card.oracle.type %}
                         <tr>
                             <td class="key">Type</td>
-                            <td class="value">{{ card.oracle.type }}</td>
+                            <td class="value">{{ search_url('type', card.oracle.type, card.oracle.type) }}</td>
                         </tr>
                     {% endif %}
 
@@ -69,7 +69,7 @@
                     {% if card.oracle.watermark %}
                         <tr>
                             <td class="key">Watermark</td>
-                            <td class="value">{{ card.oracle.watermark }}</td>
+                            <td class="value">{{ search_url('watermark', card.oracle.watermark, card.oracle.watermark) }}</td>
                         </tr>
                     {% endif %}
 
@@ -83,14 +83,14 @@
                     {% if card.oracle.expansion %}
                         <tr>
                             <td class="key">Expansion</td>
-                            <td class="value">{{ card.oracle.expansion }}</td>
+                            <td class="value">{{ search_url('expansion', card.oracle.expansion, card.oracle.expansion) }}</td>
                         </tr>
                     {% endif %}
 
                     {% if card.oracle.rarity %}
                         <tr>
                             <td class="key">Rarity</td>
-                            <td class="value">{{ card.oracle.rarity }}</td>
+                            <td class="value">{{ search_url('rarity', card.oracle.rarity, card.oracle.rarity) }}</td>
                         </tr>
                     {% endif %}
 
@@ -112,14 +112,14 @@
                     {% if card.oracle.number %}
                         <tr>
                             <td class="key">Number</td>
-                            <td class="value">{{ card.oracle.number }}</td>
+                            <td class="value">{{ search_url('number', card.oracle.number, card.oracle.number) }}</td>
                         </tr>
                     {% endif %}
 
                     {% if card.oracle.artist %}
                         <tr>
                             <td class="key">Artist</td>
-                            <td class="value">{{ card.oracle.artist }}</td>
+                            <td class="value">{{ search_url('artist', card.oracle.artist, card.oracle.artist) }}</td>
                         </tr>
                     {% endif %}
                 </tbody>

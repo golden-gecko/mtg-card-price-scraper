@@ -9,14 +9,17 @@ def route_get_cards():
 
     params = {
         'all_versions': request.args.get('all_versions', default=False, type=bool),
+        'artist': request.args.get('artist'),
         'block': request.args.get('block'),
         'color': request.args.get('color'),
         'expansion': request.args.get('expansion'),
         'format': request.args.get('format'),
         'name': request.args.get('name'),
+        'number': request.args.get('number'),
         'rarity': request.args.get('rarity'),
         'type': request.args.get('type'),
-        'subtype': request.args.get('subtype')
+        'subtype': request.args.get('subtype'),
+        'watermark': request.args.get('watermark')
     }
 
     cards = db.get_cards(

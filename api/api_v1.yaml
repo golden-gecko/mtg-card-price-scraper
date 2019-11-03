@@ -121,6 +121,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response'
+  /mtg/artists:
+    get:
+      tags:
+      - MTG
+      summary: Return artist list
+      operationId: routes.mtg.artists.route_get_artists
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
   /mtg/blocks:
     get:
       tags:
@@ -141,6 +154,11 @@ paths:
       summary: Return card list
       operationId: routes.mtg.cards.route_get_cards
       parameters:
+      - name: artist
+        in: query
+        description: Artist name
+        schema:
+          type: string
       - name: block
         in: query
         description: Block name
@@ -166,6 +184,11 @@ paths:
         description: Card name
         schema:
           type: string
+      - name: numer
+        in: query
+        description: Card numer
+        schema:
+          type: integer
       - name: rarity
         in: query
         description: Card rarity
@@ -179,6 +202,11 @@ paths:
       - name: type
         in: query
         description: Card type
+        schema:
+          type: string
+      - name: watermark
+        in: query
+        description: Card watermark
         schema:
           type: string
       responses:
@@ -266,6 +294,19 @@ paths:
       - MTG
       summary: Return subtype list
       operationId: routes.mtg.subtypes.route_get_subtypes
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /mtg/watermarks:
+    get:
+      tags:
+      - MTG
+      summary: Return watermark list
+      operationId: routes.mtg.watermarks.route_get_watermarks
       responses:
         200:
           description: Success
