@@ -17,12 +17,8 @@
     font-size: 0.9em;
 }
 
-#search-results .search-item .image-small {
+#search-results .search-item img {
     height: 155px;
-}
-
-#search-results .search-item .image-normal {
-    height: 310px;
 }
 
 #card-details .key {

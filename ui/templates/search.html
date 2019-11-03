@@ -3,163 +3,55 @@
 {% block title %}Search{% endblock %}
 
 {% block content %}
-    <div class="container">
-        <div class="row">
-            <div class="col-3 py-3 px-lg-3">
-                {% include 'components/alert.html' %}
-
-                <form id="search-form">
-                    <div class="form-group row">
-                        <label for="search-name" class="col col-form-label">Name</label>
-                        <div class="col">
-                            <input id="search-name" class="form-control" name="name" placeholder="Enter name">
-                        </div>
+    <div class="row">
+        <div class="col-3 py-3 px-lg-3">
+            <form id="search-form">
+                <div class="form-group row">
+                    <label for="search-name" class="col col-form-label">Name</label>
+                    <div class="col">
+                        <input id="search-name" class="form-control" name="name" placeholder="Enter name">
                     </div>
-
-                    <div class="form-group row">
-                        <label for="search-block" class="col col-form-label">Block</label>
-                        <div class="col">
-                            <select id="search-block" class="form-control"  name="block">
-                                <option value=""></option>
-
-                                {% if blocks %}
-                                    {% for block in blocks %}
-                                        <option value="{{ block.name }}">{{ block.name }}</option>
-                                    {% endfor %}
-                                {% endif %}
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="search-color" class="col col-form-label">Color</label>
-                        <div class="col">
-                            <select id="search-color" class="form-control"  name="color">
-                                <option value=""></option>
-
-                                {% if colors %}
-                                    {% for color in colors %}
-                                        <option value="{{ color.name }}">{{ color.name }}</option>
-                                    {% endfor %}
-                                {% endif %}
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="search-expansion" class="col col-form-label">Expansion</label>
-                        <div class="col">
-                            <select id="search-expansion" class="form-control" name="expansion">
-                                <option value=""></option>
-
-                                {% if expansions %}
-                                    {% for expansion in expansions %}
-                                        <option value="{{ expansion.name }}">{{ expansion.name }}</option>
-                                    {% endfor %}
-                                {% endif %}
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="search-format" class="col col-form-label">Format</label>
-                        <div class="col">
-                            <select id="search-format" class="form-control" name="format">
-                                <option value=""></option>
-
-                                {% if formats %}
-                                    {% for format in formats %}
-                                        <option value="{{ format.name }}">{{ format.name }}</option>
-                                    {% endfor %}
-                                {% endif %}
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="search-rarity" class="col col-form-label">Rarity</label>
-                        <div class="col">
-                            <select id="search-rarity" class="form-control"  name="rarity">
-                                <option value=""></option>
-
-                                {% if rarities %}
-                                    {% for rarity in rarities %}
-                                        <option value="{{ rarity.name }}">{{ rarity.name }}</option>
-                                    {% endfor %}
-                                {% endif %}
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="search-type" class="col col-form-label">Type</label>
-                        <div class="col">
-                            <select id="search-type" class="form-control"  name="type">
-                                <option value=""></option>
-
-                                {% if types %}
-                                    {% for type in types %}
-                                        <option value="{{ type.name }}">{{ type.name }}</option>
-                                    {% endfor %}
-                                {% endif %}
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="search-subtype" class="col col-form-label">Subtype</label>
-                        <div class="col">
-                            <select id="search-subtype" class="form-control"  name="subtype">
-                                <option value=""></option>
-
-                                {% if subtypes %}
-                                    {% for subtype in subtypes %}
-                                        <option value="{{ subtype.name }}">{{ subtype.name }}</option>
-                                    {% endfor %}
-                                {% endif %}
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="search-limit" class="col col-form-label">Per page</label>
-                        <div class="col">
-                            <select id="search-limit" class="form-control"  name="limit">
-                                <option value="12">12</option>
-                                <option value="24">24</option>
-                                <option value="48">48</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <div class="col">
-                            <button id="search-button" type="submit" class="btn btn-primary">Search</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-
-            <div class="col-9 py-3 px-lg-3">
-                <div id="search-results" class="row">
-                    {% if cards %}
-                        {% for card in cards %}
-                            <div class="col-sm-3 search-item">
-                                <p class="name">
-                                    <a href="/card/{{ card.card_id }}" title="{{ card.oracle.name }}">
-                                        {{ card.oracle.name }}
-                                    </a>
-                                </p>
-
-                                <p class="type">{{ card.oracle.type }}</p>
-
-                                <a href="/card/{{ card.card_id }}" title="{{ card.oracle.name }}">
-                                    <img class="image-small" src="http://192.168.0.162:8080/cards/images/{{ card.card_id }}.png" title="{{ card.oracle.name }}">
-                                </a>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
                 </div>
+
+                {{ search_option('Block', 'block', blocks) }}
+                {{ search_option('Color', 'color', colors) }}
+                {{ search_option('Expansion', 'expansion', expansions) }}
+                {{ search_option('Format', 'format', formats) }}
+                {{ search_option('Rarity', 'rarity', rarities) }}
+                {{ search_option('Type', 'type', types) }}
+                {{ search_option('Subtype', 'subtype', subtypes) }}
+
+                <div class="form-group row">
+                    <label for="search-limit" class="col col-form-label">Per page</label>
+                    <div class="col">
+                        <select id="search-limit" class="form-control"  name="limit">
+                            <option value="12">12</option>
+                            <option value="24">24</option>
+                            <option value="48">48</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <div class="col">
+                        <button id="search-button" type="submit" class="btn btn-primary">Search</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-9 py-3 px-lg-3">
+            <div id="search-results" class="row">
+                {% if cards %}
+                    {% for card in cards %}
+                        <div class="col-sm-3 search-item">
+                            <p class="name">{{ card_url(card, card.oracle.name) }}</p>
+                            <p class="type">{{ card.oracle.type }}</p>
+
+                            {{ card_url(card, card_image(card)) }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
             </div>
         </div>
     </div>

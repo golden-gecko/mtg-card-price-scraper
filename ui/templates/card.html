@@ -3,131 +3,127 @@
 {% block title %}{{ card.oracle.name }}{% endblock %}
 
 {% block content %}
-    <div class="container">
-        <div class="row">
-            <div class="col-12 py-3 px-lg-3">
-                <h1>{{ card.oracle.name }}</h1>
-            </div>
+    <div class="row">
+        <div class="col-12 py-3 px-lg-3">
+            <h1>{{ card.oracle.name }}</h1>
         </div>
+    </div>
 
-        <div class="row">
-            <div class="col-4 py-3 px-lg-3">
-                <img class="image-small" src="http://192.168.0.162:8080/cards/images/{{ card.card_id }}.png" title="{{ card.oracle.name }}">
-            </div>
+    <div class="row">
+        <div class="col-4 py-3 px-lg-3">{{ card_image(card) }}</div>
 
-            <div class="col-8 py-3 px-lg-3">
-                <table id="card-details" class="table">
-                    <tbody>
-                        {% if card.oracle.mana %}
-                            <tr>
-                                <td class="key">Mana Cost</td>
-                                <td class="value">
-                                    {% for mana in card.oracle.mana %}
-                                        {{ mana }}
-                                    {% endfor %}
-                                </td>
-                            </tr>
-                        {% endif %}
+        <div class="col-8 py-3 px-lg-3">
+            <table id="card-details" class="table">
+                <tbody>
+                    {% if card.oracle.mana %}
+                        <tr>
+                            <td class="key">Mana Cost</td>
+                            <td class="value">
+                                {% for mana in card.oracle.mana %}
+                                    {{ symbol_image(mana) }}
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endif %}
 
-                        {% if card.oracle.type %}
-                            <tr>
-                                <td class="key">Type</td>
-                                <td class="value">{{ card.oracle.type }}</td>
-                            </tr>
-                        {% endif %}
+                    {% if card.oracle.type %}
+                        <tr>
+                            <td class="key">Type</td>
+                            <td class="value">{{ card.oracle.type }}</td>
+                        </tr>
+                    {% endif %}
 
-                        {% if card.oracle.subtypes %}
-                            <tr>
-                                <td class="key">Subtypes</td>
-                                <td class="value">
-                                    {% for subtype in card.oracle.subtypes %}
-                                        {{ subtype }}
-                                    {% endfor %}
-                                </td>
-                            </tr>
-                        {% endif %}
+                    {% if card.oracle.subtypes %}
+                        <tr>
+                            <td class="key">Subtypes</td>
+                            <td class="value">
+                                {% for subtype in card.oracle.subtypes %}
+                                    {{ subtype }}
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endif %}
 
-                        {% if card.oracle.text %}
-                            <tr>
-                                <td class="key">Text</td>
-                                <td class="value">
-                                    {% for text_part in card.oracle.text %}
-                                        {{ text_part }}
-                                    {% endfor %}
-                                </td>
-                            </tr>
-                        {% endif %}
+                    {% if card.oracle.text %}
+                        <tr>
+                            <td class="key">Text</td>
+                            <td class="value">
+                                {% for text_part in card.oracle.text %}
+                                    {{ text_part }}
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endif %}
 
-                        {% if card.oracle.flavor %}
-                            <tr>
-                                <td class="key">Flavor</td>
-                                <td class="value">
-                                    {% for flavor_part in card.oracle.flavor %}
-                                        {{ flavor_part }}
-                                    {% endfor %}
-                                </td>
-                            </tr>
-                        {% endif %}
+                    {% if card.oracle.flavor %}
+                        <tr>
+                            <td class="key">Flavor</td>
+                            <td class="value">
+                                {% for flavor_part in card.oracle.flavor %}
+                                    {{ flavor_part }}
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endif %}
 
-                        {% if card.oracle.watermark %}
-                            <tr>
-                                <td class="key">Watermark</td>
-                                <td class="value">{{ card.oracle.watermark }}</td>
-                            </tr>
-                        {% endif %}
+                    {% if card.oracle.watermark %}
+                        <tr>
+                            <td class="key">Watermark</td>
+                            <td class="value">{{ card.oracle.watermark }}</td>
+                        </tr>
+                    {% endif %}
 
-                        {% if card.oracle.power or card.oracle.toughness %}
-                            <tr>
-                                <td class="key">P/T</td>
-                                <td class="value">{{ card.oracle.power }} / {{ card.oracle.toughness }}</td>
-                            </tr>
-                        {% endif %}
+                    {% if card.oracle.power or card.oracle.toughness %}
+                        <tr>
+                            <td class="key">P/T</td>
+                            <td class="value">{{ card.oracle.power }} / {{ card.oracle.toughness }}</td>
+                        </tr>
+                    {% endif %}
 
-                        {% if card.oracle.expansion %}
-                            <tr>
-                                <td class="key">Expansion</td>
-                                <td class="value">{{ card.oracle.expansion }}</td>
-                            </tr>
-                        {% endif %}
+                    {% if card.oracle.expansion %}
+                        <tr>
+                            <td class="key">Expansion</td>
+                            <td class="value">{{ card.oracle.expansion }}</td>
+                        </tr>
+                    {% endif %}
 
-                        {% if card.oracle.rarity %}
-                            <tr>
-                                <td class="key">Rarity</td>
-                                <td class="value">{{ card.oracle.rarity }}</td>
-                            </tr>
-                        {% endif %}
+                    {% if card.oracle.rarity %}
+                        <tr>
+                            <td class="key">Rarity</td>
+                            <td class="value">{{ card.oracle.rarity }}</td>
+                        </tr>
+                    {% endif %}
 
-                        {% if card.oracle.other_sets %}
-                            <tr>
-                                <td class="key">Other sets</td>
-                                <td class="value">
-                                    {% for set in card.oracle.other_sets %}
-                                        {% if card.card_id != set %}
-                                            <a href="/card/{{ set }}" title="{{ card.oracle.name }}">
-                                                {{ set }}
-                                            </a>
-                                        {% endif %}
-                                    {% endfor %}
-                                </td>
-                            </tr>
-                        {% endif %}
+                    {% if card.oracle.other_sets %}
+                        <tr>
+                            <td class="key">Other sets</td>
+                            <td class="value">
+                                {% for set in card.oracle.other_sets %}
+                                    {% if card.card_id != set %}
+                                        <a href="/card/{{ set }}" title="{{ card.oracle.name }}">
+                                            {{ set }}
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endif %}
 
-                        {% if card.oracle.number %}
-                            <tr>
-                                <td class="key">Number</td>
-                                <td class="value">{{ card.oracle.number }}</td>
-                            </tr>
-                        {% endif %}
+                    {% if card.oracle.number %}
+                        <tr>
+                            <td class="key">Number</td>
+                            <td class="value">{{ card.oracle.number }}</td>
+                        </tr>
+                    {% endif %}
 
-                        {% if card.oracle.artist %}
-                            <tr>
-                                <td class="key">Artist</td>
-                                <td class="value">{{ card.oracle.artist }}</td>
-                            </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
-            </div>
+                    {% if card.oracle.artist %}
+                        <tr>
+                            <td class="key">Artist</td>
+                            <td class="value">{{ card.oracle.artist }}</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
         </div>
     </div>
 {% endblock %}
