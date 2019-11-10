@@ -5,21 +5,15 @@ from http import HTTPStatus
 from helpers import create_response
 from models import db, User
 from log import get_logger
-from schemas import validate_user
 
 
 logger = get_logger()
 
 
 def route_add_user():
-    status, message, data = validate_user(request.get_json())
-
-    if not status:
-        return create_response(HTTPStatus.BAD_REQUEST, message=message)
-
     user = User(
-        email=data['email'],
-        password_hash=data['password_hash']
+        email=request.json['email'],
+        password_hash=request.json['password_hash']
     )
 
     db.session.add(user)

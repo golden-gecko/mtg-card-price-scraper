@@ -27,14 +27,14 @@ class GathererDb:
     def delete_colors(self):
         return self.db.colors.delete_many({})
 
-    def delete_expansions(self):
-        return self.db.expansions.delete_many({})
-
     def delete_formats(self):
         return self.db.formats.delete_many({})
 
     def delete_rarities(self):
         return self.db.rarities.delete_many({})
+
+    def delete_sets(self):
+        return self.db.sets.delete_many({})
 
     def delete_subtypes(self):
         return self.db.subtypes.delete_many({})
@@ -77,9 +77,6 @@ class GathererDb:
         if 'color' in params and params['color']:
             query['oracle.mana'] = params['color']
 
-        if 'expansion' in params and params['expansion']:
-            query['oracle.set'] = params['expansion']
-
         """
         if 'format' in params and params['format']:
             query['oracle.format'] = params['format']
@@ -91,14 +88,23 @@ class GathererDb:
         if 'number' in params and params['number']:
             query['oracle.number'] = params['number']
 
+        if 'power' in params and params['power']:
+            query['oracle.power'] = params['power']
+
         if 'rarity' in params and params['rarity']:
             query['oracle.rarity'] = params['rarity']
 
-        if 'type' in params and params['type']:
-            query['oracle.type'] = params['type']
+        if 'set' in params and params['set']:
+            query['oracle.set'] = params['set']
 
         if 'subtype' in params and params['subtype']:
             query['oracle.subtypes'] = params['subtype']
+
+        if 'toughness' in params and params['toughness']:
+            query['oracle.toughness'] = params['toughness']
+
+        if 'type' in params and params['type']:
+            query['oracle.type'] = params['type']
 
         if 'watermark' in params and params['watermark']:
             query['oracle.watermark'] = params['watermark']
@@ -121,14 +127,14 @@ class GathererDb:
     def get_colors(self) -> list:
         return list(self.db.colors.find({}, {'_id': 0}).sort('name', ASCENDING))
 
-    def get_expansions(self) -> list:
-        return list(self.db.expansions.find({}, {'_id': 0}).sort('name', ASCENDING))
-
     def get_formats(self) -> list:
         return list(self.db.formats.find({}, {'_id': 0}).sort('name', ASCENDING))
 
     def get_rarities(self) -> list:
         return list(self.db.rarities.find({}, {'_id': 0}).sort('name', ASCENDING))
+
+    def get_sets(self) -> list:
+        return list(self.db.sets.find({}, {'_id': 0}).sort('name', ASCENDING))
 
     def get_subtypes(self) -> list:
         return list(self.db.subtypes.find({}, {'_id': 0}).sort('name', ASCENDING))
@@ -156,9 +162,14 @@ class GathererDb:
             'card_id': data['card_id']
         }
 
-        if 'oracle' in data and 'other_sets' in data['oracle']:
+        if 'oracle' not in data:
+            raise Exception('Key "oracle" not found')
+
+        if 'other_sets' in data['oracle']:
             if data['card_id'] == max(data['oracle']['other_sets']):
                 data['main'] = True
+            else:
+                data['main'] = False
         else:
             data['main'] = True
 
@@ -166,9 +177,6 @@ class GathererDb:
 
     def index_color(self, data) -> bool:
         return self.db.colors.insert_one(data)
-
-    def index_expansion(self, data) -> bool:
-        return self.db.expansions.insert_one(data)
 
     def index_format(self, data) -> bool:
         return self.db.formats.insert_one(data)
@@ -185,6 +193,9 @@ class GathererDb:
         }
 
         return self.db.pages.update(query, data, upsert=True)
+
+    def index_set(self, data) -> bool:
+        return self.db.sets.insert_one(data)
 
     def index_subtype(self, data) -> bool:
         return self.db.subtypes.insert_one(data)

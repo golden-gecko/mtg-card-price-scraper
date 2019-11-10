@@ -38,7 +38,7 @@
                             <td class="key">Subtypes</td>
                             <td class="value">
                                 {% for subtype in card.oracle.subtypes %}
-                                    {{ subtype }}
+                                    {{ search_url('subtype', subtype, subtype) }}
                                 {% endfor %}
                             </td>
                         </tr>
@@ -76,14 +76,17 @@
                     {% if card.oracle.power or card.oracle.toughness %}
                         <tr>
                             <td class="key">P/T</td>
-                            <td class="value">{{ card.oracle.power }} / {{ card.oracle.toughness }}</td>
+                            <td class="value">
+                                {{ search_url('power', card.oracle.power, card.oracle.power) }} /
+                                {{ search_url('toughness', card.oracle.toughness, card.oracle.toughness) }}
+                            </td>
                         </tr>
                     {% endif %}
 
-                    {% if card.oracle.expansion %}
+                    {% if card.oracle.set %}
                         <tr>
-                            <td class="key">Expansion</td>
-                            <td class="value">{{ search_url('expansion', card.oracle.expansion, card.oracle.expansion) }}</td>
+                            <td class="key">Set</td>
+                            <td class="value">{{ search_url('set', card.oracle.set, card.oracle.set) }}</td>
                         </tr>
                     {% endif %}
 

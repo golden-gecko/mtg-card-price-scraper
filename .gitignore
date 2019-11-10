@@ -1,2 +1,4 @@
 __pycache__
 deprecated
+tests/report.xml
+tests/report.html

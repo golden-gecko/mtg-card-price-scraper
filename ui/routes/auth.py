@@ -16,8 +16,16 @@ blueprint = Blueprint('auth', __name__)
 logger = get_logger()
 
 
-@blueprint.route('/login', methods=['GET', 'POST'])
-def route_login():
+@blueprint.route('/login')
+def route_login_get():
+    if current_user.is_authenticated:
+        return redirect('/profile')
+
+    return render_template('auth.html', active_page='profile')
+
+
+@blueprint.route('/login', methods=['POST'])
+def route_login_post():
     logger.debug('current_user: %s', current_user)
 
     if current_user.is_authenticated:
@@ -27,34 +35,33 @@ def route_login():
         'active_page': 'profile'
     }
 
-    if request.method == 'POST':
-        status, message, data = validate_user(request.form)
+    status, message, data = validate_user(request.form)
 
-        variables['status'] = status
-        variables['message'] = message
-        variables['data'] = data
+    variables['status'] = status
+    variables['message'] = message
+    variables['data'] = data
 
-        if status:
-            data = {
-                'email': request.form.get('email'),
-                'password_hash': hashlib.sha256(request.form.get('password').encode('utf-8')).hexdigest()
-            }
+    if status:
+        data = {
+            'email': request.form.get('email'),
+            'password_hash': hashlib.sha256(request.form.get('password').encode('utf-8')).hexdigest()
+        }
 
-            api_response = send_post(make_url(config.API_URL, 'auth'), json=data)
+        api_response = send_post(make_url(config.API_URL, 'auth'), json=data)
 
-            if api_response.status_code == HTTPStatus.OK:
-                variables['status'] = True
-                variables['message'] = 'User authorized'
+        if api_response.status_code == HTTPStatus.OK:
+            variables['status'] = True
+            variables['message'] = 'User authorized'
 
-                response = make_response(render_template('auth.html', **variables))
-                response.set_cookie('jwt', api_response.json()['data']['access_token'])
+            response = make_response(render_template('auth.html', **variables))
+            response.set_cookie('jwt', api_response.json()['data']['access_token'])
 
-                login_user(User(token=api_response.json()['data']['access_token']))
+            login_user(User(token=api_response.json()['data']['access_token']))
 
-                return response
-            else:
-                variables['status'] = False
-                variables['message'] = 'Failed to authorize user'
+            return response
+        else:
+            variables['status'] = False
+            variables['message'] = 'Failed to authorize user'
 
     return render_template('auth.html', **variables)
 

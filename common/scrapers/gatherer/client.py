@@ -575,26 +575,22 @@ class GathererClient:
 
         blocks = self._extract_options(soup, '#ctl00_ctl00_MainContent_Content_blockRow a')
         colors = self._extract_options(soup, '#ctl00_ctl00_MainContent_Content_colorRow a')
-        expansions = self._extract_options(soup, '#ctl00_ctl00_MainContent_Content_setRow a')
         formats = self._extract_options(soup, '#ctl00_ctl00_MainContent_Content_formatRow a')
         rarities = self._extract_options(soup, '#ctl00_ctl00_MainContent_Content_rarityRow a')
+        sets = self._extract_options(soup, '#ctl00_ctl00_MainContent_Content_setRow a')
         subtypes = self._extract_options(soup, '#ctl00_ctl00_MainContent_Content_subtypeRow a')
         types = self._extract_options(soup, '#ctl00_ctl00_MainContent_Content_typeRow a')
 
         self.db.delete_blocks()
         self.db.delete_colors()
-        self.db.delete_expansions()
         self.db.delete_formats()
         self.db.delete_rarities()
+        self.db.delete_sets()
         self.db.delete_subtypes()
         self.db.delete_types()
 
         for item in blocks:
             if not self.db.index_block(item):
-                return False
-
-        for item in expansions:
-            if not self.db.index_expansion(item):
                 return False
 
         for item in colors:
@@ -607,6 +603,10 @@ class GathererClient:
 
         for item in rarities:
             if not self.db.index_rarity(item):
+                return False
+
+        for item in sets:
+            if not self.db.index_set(item):
                 return False
 
         for item in subtypes:

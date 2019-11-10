@@ -12,13 +12,15 @@ def route_get_cards():
         'artist': request.args.get('artist'),
         'block': request.args.get('block'),
         'color': request.args.get('color'),
-        'expansion': request.args.get('expansion'),
         'format': request.args.get('format'),
         'name': request.args.get('name'),
         'number': request.args.get('number'),
+        'power': request.args.get('power'),
         'rarity': request.args.get('rarity'),
-        'type': request.args.get('type'),
+        'set': request.args.get('set'),
         'subtype': request.args.get('subtype'),
+        'toughness': request.args.get('toughness'),
+        'type': request.args.get('type'),
         'watermark': request.args.get('watermark')
     }
 
