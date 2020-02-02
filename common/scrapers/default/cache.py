@@ -1,21 +1,21 @@
 import datetime
-import hashlib
 import os
 import re
-
-import config
+import shutil
 
 from log import get_logger
-from utils import get_timestamp, load_file, save_to_file
+from utils import get_hash, get_timestamp, get_uuid, load_file, save_to_file
 
 
 class ScraperCache:
-    def __init__(self, directory):
+    def __init__(self, directory: str):
         self.logger = get_logger()
 
         self.directory = directory
 
-    def get(self, prefix, name):
+    def get(self, prefix: str, name: str, expiration_time: int):
+        self.logger.debug('ScraperCache.get(%s, %s, %s)', prefix, name, expiration_time)
+
         path = self.get_path(prefix, name)
 
         if not os.path.exists(path):
@@ -34,25 +34,29 @@ class ScraperCache:
 
             self.logger.warning('Cache is %d seconds old', total_seconds)
 
-            if total_seconds > config.SCRAPER_CACHE_EXPIRATION_TIME:
+            if total_seconds > expiration_time:
                 return None, None, None
 
             return load_file(path), path, path_time.isoformat()
 
         return None, None, None
 
-    def get_hash(self, name):
-        return hashlib.sha256(name.encode()).hexdigest()
+    def get_path(self, prefix: str, name: str) -> str:
+        return os.path.join(self.directory, prefix, get_hash(name))
 
-    def get_path(self, prefix, name):
-        return os.path.join(self.directory, prefix, self.get_hash(name))
-
-    def set(self, prefix, name, value):
+    def set(self, prefix: str, name: str, value: str):
         path = self.get_path(prefix, name)
+
         timestamp = get_timestamp()
         timestamp_escaped = re.sub('[^0-9]+', '_', timestamp)
+
+        path_tmp = os.path.join(path, get_uuid())
         path = os.path.join(path, timestamp_escaped)
 
-        save_to_file(path, value)
+        save_to_file(path_tmp, value)
+
+        self.logger.debug('Moving file "%s"', path)
+
+        shutil.move(path_tmp, path)
 
         return path, timestamp

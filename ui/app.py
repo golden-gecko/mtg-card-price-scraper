@@ -22,7 +22,7 @@ def route_error(error):
 logger = get_logger()
 
 app = Flask(__name__)
-app.config.from_object(config.Config)
+app.config.from_object(config.AppConfig)
 app.register_blueprint(auth_blueprint)
 app.register_blueprint(card_blueprint)
 app.register_blueprint(contact_blueprint)

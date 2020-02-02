@@ -3,7 +3,7 @@ from scrapers.gatherer.db import GathererDb
 
 
 def route_get_rarities():
-    db = GathererDb(host='mongo')
+    db = GathererDb()
 
     data = {
         'rarities': db.get_rarities()

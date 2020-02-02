@@ -1,13 +1,15 @@
 import pika
 
+import config
+
 from log import get_logger
 
 
 class GathererQueue:
-    def __init__(self, host):
+    def __init__(self, host= config.RABBIT_HOST):
         self.logger = get_logger()
 
-        self.connection_parameters = pika.ConnectionParameters(host)
+        self.connection_parameters = pika.ConnectionParameters(host=host)
         self.basic_properties = pika.BasicProperties(delivery_mode=2)
 
         self.connection = None

@@ -16,13 +16,13 @@ from utils import download_and_save_image, download_and_save_text, ExecutionTime
 class GathererClient:
     search_url = 'https://gatherer.wizards.com/Pages/Advanced.aspx'
 
-    page_url = 'http://gatherer.wizards.com/Pages/Search/Default.aspx?page={page_id}&name=+[]'
+    page_url = 'https://gatherer.wizards.com/Pages/Search/Default.aspx?page={page_id}&name=+[]'
 
-    card_details_oracle_url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?printed=false&multiverseid={card_id}'
-    card_details_printed_url = 'http://gatherer.wizards.com/Pages/Card/Details.aspx?printed=true&multiverseid={card_id}'
-    card_image_url = 'http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid={card_id}&type=card'
-    card_languages_url = 'http://gatherer.wizards.com/Pages/Card/Languages.aspx?multiverseid={card_id}'
-    card_printings_url = 'http://gatherer.wizards.com/Pages/Card/Printings.aspx?multiverseid={card_id}'
+    card_details_oracle_url = 'https://gatherer.wizards.com/Pages/Card/Details.aspx?printed=false&multiverseid={card_id}'
+    card_details_printed_url = 'https://gatherer.wizards.com/Pages/Card/Details.aspx?printed=true&multiverseid={card_id}'
+    card_image_url = 'https://gatherer.wizards.com/Handlers/Image.ashx?multiverseid={card_id}&type=card'
+    card_languages_url = 'https://gatherer.wizards.com/Pages/Card/Languages.aspx?multiverseid={card_id}'
+    card_printings_url = 'https://gatherer.wizards.com/Pages/Card/Printings.aspx?multiverseid={card_id}'
 
     symbol_url = 'https://gatherer.wizards.com/Handlers/Image.ashx?size=medium&name={symbol}&type=symbol'
 
@@ -62,7 +62,7 @@ class GathererClient:
 
                 break
             except Exception as e:
-                self.logger.critical('Processing failed: %s', e)
+                self.logger.exception('Processing failed: %s', e)
                 self.queue.disconnect()
 
                 time.sleep(1)
@@ -81,7 +81,7 @@ class GathererClient:
 
                 break
             except Exception as e:
-                self.logger.critical('Processing failed: %s', e)
+                self.logger.exception('Processing failed: %s', e)
                 self.queue.disconnect()
 
                 time.sleep(1)

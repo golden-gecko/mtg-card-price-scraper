@@ -1,27 +1,30 @@
 import threading
 
+from bs4 import BeautifulSoup
+
 from log import get_logger
 from scrapers.default.cache import ScraperCache
-from scrapers.default.client import ScraperClient
+from scrapers.default.client import ScraperConfiguration, ScraperClient
 from scrapers.default.db import ScraperDb
 from scrapers.default.queue import ScraperQueue
+from utils import ExpirationTime
 
 
 logger = get_logger()
 
 
-def process_pages(name, configuration):
-    logger.info('Thread %s starting...', name)
+def process_pages(configuration):
+    logger.info('Thread "%s" starting...', configuration['name'])
 
-    scraper = ScraperClient(
-        cache=ScraperCache(directory='/data'),
-        db=ScraperDb(host='mongo', database='scraper'),
-        queue=ScraperQueue(host='rabbit')
-    )
-    scraper.add_configuration(name, configuration)
+    cache = ScraperCache(directory='/data')
+    db = ScraperDb(database='scraper')
+    queue = ScraperQueue()
+
+    scraper = ScraperClient(cache=cache, db=db, queue=queue)
+    scraper.add_configuration(ScraperConfiguration(configuration))
     scraper.process()
 
-    logger.info('Thread %s exiting...', name)
+    logger.info('Thread "%s" exiting...', configuration['name'])
 
 
 def main():
@@ -412,48 +415,135 @@ def main():
                     }
                 }
             ]
-        },
+        }
+    }
+
+    configurations = {
         'strefamtg': {
-            'init': [
+            'init': {
+                'steps': [
+                    {
+                        'stage': 'main',
+                        'url': 'https://www.strefamtg.pl/pl/3-single-mtg'
+                    }
+                ]
+            },
+            'main': {
+                'expires': ExpirationTime.week,
+                'steps': [
+                    {
+                        'stage': 'category',
+                        'selector': '#subcategories .subcategory-image .img'
+                    }
+                ]
+            },
+            'category': {
+                'expires': ExpirationTime.week,
+                'steps': [
+                    {
+                        'stage': 'category',
+                        'selector': '#pagination .pagination a'
+                    },
+                    {
+                        'stage': 'product',
+                        'selector': '.product_list .product_img_link'
+                    }
+                ]
+            },
+            'product': {
+                'expires': ExpirationTime.week,
+                'steps': [
+                    {
+                        'attributes': {
+                            'condition': '#product_condition .editable',
+                            'name': '.primary_block .pb-center-column h1',
+                            'price': '#our_price_display',
+                            'quantity': '#quantityAvailable'
+                        }
+                    }
+                ]
+            }
+        }
+    }
+
+    def mock_product_get_condition(soup: BeautifulSoup):
+        selector = '.condition'
+
+        logger.warning('Searching for attribute with selector "%s"', selector)
+
+        value = soup.select_one(selector)
+
+        logger.debug('value: %s', value)
+
+        if not value:
+            return ''
+
+        logger.debug('value: %s', value)
+
+        return value.text.replace('Condition ', '')
+
+    configurations = [
+        {
+            'name': 'mock',
+            'stages': [
                 {
-                    'stage': 'main',
-                    'url': 'https://www.strefamtg.pl/pl/3-single-mtg'
-                }
-            ],
-            'main': [
-                {
-                    'stage': 'category',
-                    'selector': '#subcategories .subcategory-image .img'
-                }
-            ],
-            'category': [
-                {
-                    'stage': 'category',
-                    'selector': '#pagination .pagination a'
+                    'name': 'init',
+                    'steps': [
+                        {
+                            'stage': 'main',
+                            'urls': [
+                                'http://10.10.0.20/'
+                            ]
+                        }
+                    ]
                 },
                 {
-                    'stage': 'product',
-                    'selector': '.product_list .product_img_link'
-                }
-            ],
-            'product': [
+                    'name': 'main',
+                    'expires': ExpirationTime.hour,
+                    'steps': [
+                        {
+                            'stage': 'category',
+                            'selectors': [
+                                '.category a'
+                            ]
+                        }
+                    ]
+                },
                 {
-                    'attributes': {
-                        'condition': '#product_condition .editable',
-                        'name': '.primary_block .pb-center-column h1',
-                        'price': '#our_price_display',
-                        'quantity': '#quantityAvailable'
-                    }
+                    'name': 'category',
+                    'expires': ExpirationTime.hour,
+                    'steps': [
+                        {
+                            'stage': 'product',
+                            'selectors': [
+                                '.product a'
+                            ]
+                        }
+                    ]
+                },
+                {
+                    'name': 'product',
+                    'expires': ExpirationTime.minute,
+                    'steps': [
+                        {
+                            'stage': 'product',
+                            'attributes': {
+                                'name': '.name',
+                                'price': '.price',
+                                'condition': mock_product_get_condition
+                            }
+                        }
+                    ]
                 }
             ]
         }
-    }
+    ]
 
     try:
         threads = []
 
-        for name, configuration in configurations.items():
-            x = threading.Thread(target=process_pages, args=(name, configuration))
+        for configuration in configurations:
+            x = threading.Thread(target=process_pages, args=(configuration, ))
             x.start()
 
             threads.append(x)
@@ -463,7 +553,7 @@ def main():
     except KeyboardInterrupt as e:
         logger.warning('Processing stopped: %s', e)
     except Exception as e:
-        logger.critical('Scraper failed: %s', e)
+        logger.exception('Scraper failed: %s', e)
 
     logger.info('Service exiting...')
 

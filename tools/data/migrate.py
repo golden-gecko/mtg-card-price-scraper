@@ -290,4 +290,39 @@ def migrate_011():
         print(response.status_code)
 
 
-migrate_011()
+def migrate_012():
+    db = MongoClient('10.10.0.13')
+
+    queue = ScraperQueue('10.10.0.16')
+    queue.connect()
+
+    query = {
+    }
+
+    for page in db.scraper.pages.find(query):
+        print(page)
+
+        page_query = {
+            '_id': page['_id']
+        }
+
+        new_versions = []
+
+        if 'versions' in page:
+            for version in page['versions']:
+                if os.path.isfile(version['cache']['path']):
+                    new_versions.append(version)
+
+        versions_query = {
+            '$set': {
+                'versions': new_versions
+            }
+        }
+
+        print(page_query)
+        print(versions_query)
+
+        db.scraper.pages.update_one(page_query, versions_query)
+
+
+migrate_012()

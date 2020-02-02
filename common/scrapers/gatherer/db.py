@@ -1,10 +1,12 @@
 from pymongo import ASCENDING, MongoClient
 
+import config
+
 from log import get_logger
 
 
 class GathererDb:
-    def __init__(self, host):
+    def __init__(self, host=config.MONGO_HOST):
         self.logger = get_logger()
 
         self.client = MongoClient(host)

@@ -47,7 +47,7 @@ def route_pages_put():
 
 
 def route_statistics():
-    db = ScraperDb('mongo', 'scraper')
+    db = ScraperDb(database='scraper')
 
     statistics = {
         'db': db.get_statistics()

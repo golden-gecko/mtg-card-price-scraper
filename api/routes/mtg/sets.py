@@ -3,7 +3,7 @@ from scrapers.gatherer.db import GathererDb
 
 
 def route_get_sets():
-    db = GathererDb(host='mongo')
+    db = GathererDb()
 
     data = {
         'sets': db.get_sets()

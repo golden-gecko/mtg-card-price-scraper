@@ -18,7 +18,7 @@ class User(UserMixin):
 
         if not self.id and self.token:
             try:
-                decoded = jwt.decode(self.token, config.Config.JWT_SECRET_KEY)
+                decoded = jwt.decode(self.token, config.AppConfig.JWT_SECRET_KEY)
             except jwt.ExpiredSignatureError as e:
                 self.logger.warning('Failed to decode token "%s": %s', self.token, e)
                 self.logger.debug('User.is_authenticated(): False (1)')

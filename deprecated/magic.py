@@ -91,7 +91,7 @@ class MagicClient:
                 self.logger.warning('Processing stopped: %s', e)
                 break
             except Exception as e:
-                self.logger.error('Processing failed: %s', e)
+                self.logger.exception('Processing failed: %s', e)
                 time.sleep(1)
 
     def process_formats(self) -> bool:

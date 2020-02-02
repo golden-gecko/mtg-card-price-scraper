@@ -7,9 +7,9 @@ from scrapers.gatherer.queue import GathererQueue
 
 
 def route_cards(card_id: int):
-    db = GathererDb(host='mongo')
+    db = GathererDb()
 
-    queue = GathererQueue(host='rabbit')
+    queue = GathererQueue()
     queue.connect()
 
     gatherer = GathererClient(db=db, queue=queue)
@@ -19,9 +19,9 @@ def route_cards(card_id: int):
 
 
 def route_pages(page_id: int):
-    db = GathererDb(host='mongo')
+    db = GathererDb()
 
-    queue = GathererQueue(host='rabbit')
+    queue = GathererQueue()
     queue.connect()
 
     gatherer = GathererClient(db=db, queue=queue)
