@@ -1,9 +1,9 @@
 import json
 import jsonschema
-import pymongo.errors
 import random
 
 from bs4 import BeautifulSoup
+from pymongo.errors import DuplicateKeyError
 from urllib.parse import urlsplit, urlunsplit
 
 from log import get_logger
@@ -110,6 +110,8 @@ class ScraperClient:
                 self.queue.connect()
                 self.register_configurations()
                 self.queue.start_consuming()
+
+                retries = 0
             except KeyboardInterrupt as e:
                 self.logger.warning('Processing stopped: %s', e)
                 self.queue.disconnect()
@@ -177,14 +179,24 @@ class ScraperClient:
 
         return url
 
-    def process_attributes(self, soup: BeautifulSoup, attributes: dict) -> dict:
+    def process_attributes(self, soup: BeautifulSoup, configuration_name: str, stage_name: str, url: str, cache_path: str, attributes: dict) -> dict:
         data = {}
 
         for name, selector in attributes.items():
             if callable(selector):
                 self.logger.warning('Searching for attribute "%s"', name)
 
-                data[name] = selector(soup)
+                value = selector(soup)
+
+                if not value:
+                    self.logger.warning('Attribute "%s" not found', name)
+                else:
+                    value = value.strip()
+
+                    if not value:
+                        self.logger.warning('Attribute "%s" found, but it is empty', name)
+                    else:
+                        data[name] = value
             else:
                 self.logger.warning('Searching for attribute "%s" with selector "%s"', name, selector)
 
@@ -200,25 +212,28 @@ class ScraperClient:
                     else:
                         data[name] = value
 
+        if data:
+            self.queue_attributes_for_indexing(configuration_name, stage_name, url, cache_path, data)
+
         return data
 
-    def process_selector(self, soup: BeautifulSoup, base_url: str, stage_name: str, selector: str, configuration_name: str, expires: int):
+    def process_selector(self, soup: BeautifulSoup, configuration_name: str, stage_name: str, url: str, selector: str, expires: int):
         sub_urls_elements = soup.select(selector)
 
         self.logger.debug('Found %d sub URL-s', len(sub_urls_elements))
 
         sub_urls = []
 
-        for url in sub_urls_elements:
-            if url.has_attr('href'):
-                sub_urls.append(self.validate_url(base_url, url['href']))
+        for sub_url in sub_urls_elements:
+            if sub_url.has_attr('href'):
+                sub_urls.append(self.validate_url(url, sub_url['href']))
             else:
-                self.logger.warning('No "href" attribute in "%s"', url)
+                self.logger.warning('No "href" attribute in "%s"', sub_url)
 
         random.shuffle(sub_urls)
 
-        for url in sub_urls:
-            self.queue_url_for_downloading(configuration_name, stage_name, url, expires)
+        for sub_url in sub_urls:
+            self.queue_url_for_downloading(configuration_name, stage_name, sub_url, expires)
 
     def index_stats(self, configuration_name: str, body_json: dict, response: dict):
         stats = {
@@ -267,18 +282,16 @@ class ScraperClient:
 
                     if response['html']:
                         self.queue_page_for_parsing(
-                            configuration_name, body_json['stage'], response['path'], body_json['url']
+                            configuration_name, body_json['stage'], body_json['url'], response['path']
                         )
 
                     self.logger.debug('Message processed')
-            except (ScraperDuplicateException, ScraperSkipException) as e:
-                self.logger.warning('%s', e)
             except Exception as e:
-                self.logger.exception('Failed to process task: %s', e)
+                self.logger.error('Failed to process task: %s', e)
 
-                body_json['error'] = str(e)
+                # body_json['error'] = str(e)
 
-                self.queue_value('{}_failed'.format(method_frame.routing_key), json.dumps(body_json))
+                self.queue_value('{}_failed'.format(method_frame.routing_key), body)
             finally:
                 self.queue.ack(method_frame.delivery_tag)
 
@@ -306,10 +319,10 @@ class ScraperClient:
                 soup = BeautifulSoup(html, 'lxml')
 
                 for step in stage['steps']:
-                    attributes = {}
-
                     if 'attributes' in step:
-                        attributes = self.process_attributes(soup, step['attributes'])
+                        attributes = self.process_attributes(
+                            soup, configuration_name, stage_name, body_json['url'], body_json['cache_path'], step['attributes']
+                        )
 
                         self.logger.debug('attributes: %s', attributes)
 
@@ -318,7 +331,7 @@ class ScraperClient:
 
                         for selector in step['selectors']:
                             self.process_selector(
-                                soup, body_json['parent_url'], step['stage'], selector, configuration_name, expires
+                                soup, configuration_name, step['stage'], body_json['url'], selector, expires
                             )
 
                     if 'urls' in step:
@@ -327,46 +340,13 @@ class ScraperClient:
                         for url in step['urls']:
                             self.queue_url_for_downloading(configuration_name, step['stage'], url, expires)
 
-                '''
-                attributes = {}
-
-                for sub_configuration in configuration[task['stage']]:
-                    self.logger.debug('sub_configuration: %s', sub_configuration)
-
-                    if 'attributes' in sub_configuration:
-                        self.process_attributes(url_soup, task['url'], sub_configuration['attributes'], attributes)
-
-                    if 'stage' in sub_configuration and 'selector' in sub_configuration:
-                        self.process_selector(
-                            url_soup,
-                            task['url'],
-                            sub_configuration['stage'],
-                            sub_configuration['selector'],
-                            method_frame.routing_key,
-                            sub_configuration['expires']
-                        )
-
-                version = {
-                    'cache': {
-                        'path': cache_path,
-                        'timestamp': cache_timestamp
-                    }
-                }
-
-                if attributes:
-                    version['attributes'] = attributes
-
-                # index version
-                self.db.index_version(task, version)
-                '''
-            except (ScraperDuplicateException, ScraperSkipException) as e:
-                self.logger.warning('%s', e)
+                    self.logger.debug('Message processed')
             except Exception as e:
-                self.logger.exception('Failed to process task: %s', e)
+                self.logger.error('Failed to process task: %s', e)
 
-                body_json['error'] = str(e)
+                # body_json['error'] = str(e)
 
-                self.queue_value('{}_failed'.format(method_frame.routing_key), json.dumps(body_json))
+                self.queue_value('{}_failed'.format(method_frame.routing_key), body)
             finally:
                 self.queue.ack(method_frame.delivery_tag)
 
@@ -378,122 +358,25 @@ class ScraperClient:
             body_json = json.loads(body_json)
 
             try:
-                pass
-            except (ScraperDuplicateException, ScraperSkipException) as e:
-                self.logger.warning('%s', e)
+                try:
+                    jsonschema.validate(body_json, schemas.message_indexer)
+                except jsonschema.ValidationError as e:
+                    raise ScraperProcessingException(e)
+
+                try:
+                    self.db.index_page(body_json)
+                except DuplicateKeyError as e:
+                    self.logger.warn('Failed to index page: %s', e)
+
+                self.logger.debug('Message processed')
             except Exception as e:
-                self.logger.exception('Failed to process task: %s', e)
+                self.logger.error('Failed to process task: %s', e)
 
-                body_json['error'] = str(e)
+                # body_json['error'] = str(e)
 
-                self.queue_value('{}_failed'.format(method_frame.routing_key), json.dumps(body_json))
+                self.queue_value('{}_failed'.format(method_frame.routing_key), body)
             finally:
                 self.queue.ack(method_frame.delivery_tag)
-
-    """
-    def process_tasks(self, channel, method_frame, header_frame, body):
-        with ExecutionTime('Processing page'):
-            queue_name = method_frame.routing_key
-
-            self.logger.debug('Received message "%s" from queue "%s"', body, queue_name)
-
-            body_json = body.decode('utf-8')
-            body_json = json.loads(body_json)
-
-            try:
-                configuration_name, configuration = self.validate_configuration(queue_name)
-
-                task = self.validate_task(body_json)
-
-                self.logger.debug('configuration_name: %s', configuration_name)
-                self.logger.debug('task: %s', task)
-
-                if task['stage'] not in configuration:
-                    raise ScraperProcessingException('Stage "{}" not found in configuration'.format(task['stage']))
-
-                data = {
-                    'configuration': configuration_name,
-                    'stage': task['stage'],
-                    'timestamp': get_timestamp(),
-                    'url': task['url']
-                }
-
-                # index page
-                with ExecutionTime('Indexing page'):
-                    try:
-                        self.db.index_page(data)
-                    except pymongo.errors.DuplicateKeyError as e:
-                        self.logger.warning('Page is already indexed: %s', e)
-
-                with ExecutionTime('Downloading page'):
-                    url_html, url_code, cache_path, cache_timestamp, url_download_time = self.download_url(
-                        configuration_name, task['url'], task['expires']
-                    )
-                    url_soup = BeautifulSoup(url_html, 'lxml')
-
-                    stats = {
-                        'code': url_code,
-                        'configuration': configuration_name,
-                        'stage': task['stage'],
-                        'timestamp': get_timestamp(),
-                        'url': task['url'],
-                    }
-
-                    if url_download_time:
-                        stats['download_time'] = url_download_time
-                        stats['cache'] = False
-                    else:
-                        stats['cache'] = True
-
-                    self.db.index_stats(stats)
-
-                page = ScraperPage(self.db, task)
-
-                with ExecutionTime('Search for version'):
-                    if page.is_version_indexed(cache_path):
-                        raise ScraperSkipException('Version is indexed. Skipping...')
-
-                attributes = {}
-
-                for sub_configuration in configuration[task['stage']]:
-                    self.logger.debug('sub_configuration: %s', sub_configuration)
-
-                    if 'attributes' in sub_configuration:
-                        self.process_attributes(url_soup, task['url'], sub_configuration['attributes'], attributes)
-
-                    if 'stage' in sub_configuration and 'selector' in sub_configuration:
-                        self.process_selector(
-                            url_soup,
-                            task['url'],
-                            sub_configuration['stage'],
-                            sub_configuration['selector'],
-                            method_frame.routing_key,
-                            sub_configuration['expires']
-                        )
-
-                version = {
-                    'cache': {
-                        'path': cache_path,
-                        'timestamp': cache_timestamp
-                    }
-                }
-
-                if attributes:
-                    version['attributes'] = attributes
-
-                # index version
-                self.db.index_version(task, version)
-            except (ScraperDuplicateException, ScraperSkipException) as e:
-                self.logger.warning('%s', e)
-            except Exception as e:
-                self.logger.exception('Failed to process task: %s', e)
-
-                body_json['error'] = str(e)
-
-                self.queue_value('{}_failed'.format(queue_name), json.dumps(body_json))
-            finally:
-                self.queue.ack(method_frame.delivery_tag)
-    """
 
     def queue_url_for_downloading(self, configuration: str, stage: str, url: str, expires: int):
         self.logger.info('Queuing for downloading %s, %s, %s, %s', configuration, stage, url, expires)
@@ -507,17 +390,30 @@ class ScraperClient:
 
         self.queue_value(get_queue_name(configuration, 'downloader'), json.dumps(data))
 
-    def queue_page_for_parsing(self, configuration: str, stage: str, cache_path: str, parent_url: str):
+    def queue_page_for_parsing(self, configuration: str, stage: str, url: str, cache_path: str):
         self.logger.info('Queuing for parsing %s, %s, %s', configuration, stage, cache_path)
 
         data = {
-            'configuration': configuration,
             'cache_path': cache_path,
-            'parent_url': parent_url,
+            'configuration': configuration,
             'stage': stage,
+            'url': url
         }
 
         self.queue_value(get_queue_name(configuration, 'parser'), json.dumps(data))
+
+    def queue_attributes_for_indexing(self, configuration: str, stage: str, url: str, cache_path: str, attributes: dict):
+        self.logger.info('Queuing for indexing %s, %s, %s', configuration, stage, attributes)
+
+        data = {
+            'attributes': attributes,
+            'cache_path': cache_path,
+            'configuration': configuration,
+            'stage': stage,
+            'url': url
+        }
+
+        self.queue_value(get_queue_name(configuration, 'indexer'), json.dumps(data))
 
     def queue_value(self, queue, value):
         self.logger.debug('ScraperClient.queue_value(%s, %s)', queue, value)

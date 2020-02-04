@@ -9,6 +9,6 @@ RUN pip3 install -r requirements.txt
 COPY api .
 COPY common .
 
-EXPOSE 8000
+EXPOSE 7000
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--log-level", "debug", "app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:7000", "--log-level", "debug", "app:app"]

@@ -1,28 +1,29 @@
 import datetime
 import logging
+import os
 
 
-API_HOST = '10.10.0.10'
-API_PORT = 8000
+API_HOST = os.environ.get('API_HOST')
+API_PORT = int(os.environ.get('API_PORT'))
 API_URL = 'http://{host}:{port}/v1/'.format(host=API_HOST, port=API_PORT)
-
-DATABASE_DRIVER = 'postgresql+psycopg2'
-DATABASE_HOST = '10.10.0.15'
-DATABASE_NAME = 'cenykart'
-DATABASE_PASSWORD = 'ca978112ca1bbdcafac2'
-DATABASE_PORT = 5432
-DATABASE_USER = 'cenykart'
 
 LOG_LEVEL = logging.DEBUG
 
-MONGO_HOST = '10.10.0.13'
-MONGO_PORT = 27017
+MONGO_HOST = os.environ.get('MONGO_HOST')
+MONGO_PORT = int(os.environ.get('MONGO_PORT'))
 
-RABBIT_HOST = '10.10.0.16'
-RABBIT_PORT = 5672
+POSTGRES_DRIVER = 'postgresql+psycopg2'
+POSTGRES_HOST = os.environ.get('POSTGRES_HOST')
+POSTGRES_DATABASE_NAME = 'cenykart'
+POSTGRES_PASSWORD = 'ca978112ca1bbdcafac2'
+POSTGRES_PORT = int(os.environ.get('POSTGRES_PORT'))
+POSTGRES_USER = 'cenykart'
 
-STATIC_HOST = '10.10.0.18'
-STATIC_PORT = 8080
+RABBIT_HOST = os.environ.get('RABBIT_HOST')
+RABBIT_PORT = int(os.environ.get('RABBIT_PORT'))
+
+STATIC_HOST = os.environ.get('STATIC_HOST')
+STATIC_PORT = int(os.environ.get('STATIC_PORT'))
 STATIC_URL = 'http://{host}:{port}/'.format(host=STATIC_HOST, port=STATIC_PORT)
 
 
@@ -33,12 +34,12 @@ class AppConfig:
     SECRET_KEY = '3e23e8160039594a3389'
 
     SQLALCHEMY_DATABASE_URI = '{driver}://{user}:{password}@{host}:{port}/{name}'.format(
-        driver=DATABASE_DRIVER,
-        user=DATABASE_USER,
-        password=DATABASE_PASSWORD,
-        host=DATABASE_HOST,
-        port=DATABASE_PORT,
-        name=DATABASE_NAME
+        driver=POSTGRES_DRIVER,
+        user=POSTGRES_USER,
+        password=POSTGRES_PASSWORD,
+        host=POSTGRES_HOST,
+        port=POSTGRES_PORT,
+        name=POSTGRES_DATABASE_NAME
     )
     SQLALCHEMY_ECHO = True
     SQLALCHEMY_TRACK_MODIFICATIONS = False

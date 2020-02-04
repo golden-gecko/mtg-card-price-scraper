@@ -19,47 +19,42 @@ services:
       - mongo
       - postgres
       - redis
+    env_file:
+      - .env
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:8000/v1/healthcheck']
+      test: ['CMD', 'curl', '-f', 'http://${API_HOST}:${API_PORT}/v1/healthcheck']
       interval: 10s
       timeout: 2s
       retries: 2
     networks:
       default:
-        ipv4_address: 10.10.0.10
+        ipv4_address: ${API_HOST}
     ports:
-      - 8000:8000
-    restart: always
+      - ${API_PORT}:${API_PORT}
+    restart: unless-stopped
 
   elasticsearch:
+    env_file:
+      - .env
     environment:
       - discovery.type=single-node
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.8.2
-    restart: always
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.5.2
+    restart: unless-stopped
     volumes:
       - elasticsearch:/usr/share/elasticsearch/data
-
-  grafana:
-    environment:
-      - GF_INSTALL_PLUGINS=grafana-simple-json-datasource
-      - GF_SECURITY_ADMIN_PASSWORD=grafana
-    image: grafana/grafana:6.4.3
-    networks:
-      default:
-        ipv4_address: 10.10.0.11
-    restart: always
 
   kibana:
     depends_on:
       - elasticsearch
-    image: docker.elastic.co/kibana/kibana:6.8.2
+    env_file:
+      - .env
+    image: docker.elastic.co/kibana/kibana:7.5.2
     networks:
       default:
-        ipv4_address: 10.10.0.12
+        ipv4_address: ${KIBANA_HOST}
     ports:
-      - 5601:5601
-    restart: always
+      - ${KIBANA_PORT}:${KIBANA_PORT}
+    restart: unless-stopped
     volumes:
       - kibana:/usr/share/kibana/config
 
@@ -67,17 +62,21 @@ services:
     build:
       context: .
       dockerfile: mock/Dockerfile
+    env_file:
+      - .env
     networks:
       default:
-        ipv4_address: 10.10.0.20
-    restart: always
+        ipv4_address: ${MOCK_HOST}
+    restart: unless-stopped
 
   mongo:
+    env_file:
+      - .env
     image: mongo:4.2.0
     networks:
       default:
-        ipv4_address: 10.10.0.13
-    restart: always
+        ipv4_address: ${MONGO_HOST}
+    restart: unless-stopped
     volumes:
       - mongo_configdb:/data/configdb
       - mongo_db:/data/db
@@ -85,45 +84,53 @@ services:
   mongo_express:
     depends_on:
       - mongo
+    env_file:
+      - .env
     image: mongo-express:0.49.0
     networks:
       default:
-        ipv4_address: 10.10.0.14
+        ipv4_address: ${MONGO_EXPRESS_HOST}
     ports:
-      - 8081:8081
-    restart: always
+      - ${MONGO_EXPRESS_PORT}:${MONGO_EXPRESS_PORT}
+    restart: unless-stopped
 
   postgres:
+    env_file:
+      - .env
     environment:
       - POSTGRES_PASSWORD=postgres
     image: postgres:10.5
     networks:
       default:
-        ipv4_address: 10.10.0.15
+        ipv4_address: ${POSTGRES_HOST}
     ports:
-      - 5432:5432
-    restart: always
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    restart: unless-stopped
     volumes:
       - postgres:/var/lib/postgresql/data
 
   rabbit:
     build:
       context: rabbit
+    env_file:
+      - .env
     networks:
       default:
-        ipv4_address: 10.10.0.16
+        ipv4_address: ${RABBIT_HOST}
     ports:
       - 15672:15672
-    restart: always
+    restart: unless-stopped
     volumes:
       - rabbit:/var/lib/rabbitmq
 
   redis:
+    env_file:
+      - .env
     image: redis:5.0.5
     networks:
       default:
-        ipv4_address: 10.10.0.17
-    restart: always
+        ipv4_address: ${REDIS_HOST}
+    restart: unless-stopped
     volumes:
       - redis:/data
 
@@ -134,7 +141,9 @@ services:
     depends_on:
       - mongo
       - rabbit
-    restart: always
+    env_file:
+      - .env
+    restart: unless-stopped
     volumes:
       - scraper_gatherer:/data
 
@@ -145,31 +154,39 @@ services:
     depends_on:
       - mongo
       - rabbit
-    restart: always
+    env_file:
+      - .env
+    restart: unless-stopped
     volumes:
       - scraper_mtg:/data
 
   selenium_hub:
+    env_file:
+      - .env
     image: selenium/hub:3.141.59
-    restart: always
+    restart: unless-stopped
 
   selenium_node_chrome:
     depends_on:
       - selenium_hub
+    env_file:
+      - .env
     environment:
       - HUB_HOST=selenium_hub
       - SE_OPTS=-browserTimeout 60 -timeout 60 -cleanUpCycle 60
     image: selenium/node-chrome:3.141.59
-    restart: always
+    restart: unless-stopped
 
   static:
     build:
       context: .
       dockerfile: static/Dockerfile
+    env_file:
+      - .env
     networks:
       default:
-        ipv4_address: 10.10.0.18
-    restart: always
+        ipv4_address: ${STATIC_HOST}
+    restart: unless-stopped
     volumes:
       - scraper_gatherer:/data:ro
 
@@ -180,21 +197,19 @@ services:
     depends_on:
       - api
       - static
+    env_file:
+      - .env
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:80/']
+      test: ['CMD', 'curl', '-f', 'http://localhost:${UI_PORT}/']
       interval: 10s
       timeout: 2s
       retries: 2
     networks:
       default:
-        ipv4_address: 10.10.0.19
+        ipv4_address: ${UI_HOST}
     ports:
-      - 80:80
-    restart: always
-
-  vault:
-    image: vault:1.2.3
-    restart: always
+      - ${UI_PORT}:${UI_PORT}
+    restart: unless-stopped
 
 volumes:
   elasticsearch:

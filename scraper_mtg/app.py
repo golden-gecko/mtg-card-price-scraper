@@ -429,7 +429,7 @@ def main():
                 ]
             },
             'main': {
-                'expires': ExpirationTime.week,
+                'expires': ExpirationTime.minute,
                 'steps': [
                     {
                         'stage': 'category',
@@ -438,7 +438,7 @@ def main():
                 ]
             },
             'category': {
-                'expires': ExpirationTime.week,
+                'expires': ExpirationTime.minute,
                 'steps': [
                     {
                         'stage': 'category',
@@ -451,7 +451,7 @@ def main():
                 ]
             },
             'product': {
-                'expires': ExpirationTime.week,
+                'expires': ExpirationTime.minute,
                 'steps': [
                     {
                         'attributes': {
@@ -482,6 +482,22 @@ def main():
 
         return value.text.replace('Condition ', '')
 
+    def mock_product_get_price(soup: BeautifulSoup):
+        selector = '.price'
+
+        logger.warning('Searching for attribute with selector "%s"', selector)
+
+        value = soup.select_one(selector)
+
+        logger.debug('value: %s', value)
+
+        if not value:
+            return ''
+
+        logger.debug('value: %s', value)
+
+        return value.text.replace(' USD', '')
+
     configurations = [
         {
             'name': 'mock',
@@ -499,7 +515,7 @@ def main():
                 },
                 {
                     'name': 'main',
-                    'expires': ExpirationTime.hour,
+                    'expires': ExpirationTime.minute,
                     'steps': [
                         {
                             'stage': 'category',
@@ -511,7 +527,7 @@ def main():
                 },
                 {
                     'name': 'category',
-                    'expires': ExpirationTime.hour,
+                    'expires': ExpirationTime.minute,
                     'steps': [
                         {
                             'stage': 'product',
@@ -529,8 +545,9 @@ def main():
                             'stage': 'product',
                             'attributes': {
                                 'name': '.name',
-                                'price': '.price',
-                                'condition': mock_product_get_condition
+                                'price': mock_product_get_price,
+                                'condition': mock_product_get_condition,
+                                'quantity': '.quantity'
                             }
                         }
                     ]
@@ -560,3 +577,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
