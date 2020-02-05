@@ -39,6 +39,9 @@ services:
     environment:
       - discovery.type=single-node
     image: docker.elastic.co/elasticsearch/elasticsearch:7.5.2
+    networks:
+      default:
+        ipv4_address: ${ELASTIC_HOST}
     restart: unless-stopped
     volumes:
       - elasticsearch:/usr/share/elasticsearch/data

@@ -7,9 +7,9 @@ docker-compose up \
     --detach \
     --remove-orphans \
     --scale api=1 \
-    --scale elasticsearch=0 \
+    --scale elasticsearch=1 \
     --scale grafana=0 \
-    --scale kibana=0 \
+    --scale kibana=1 \
     --scale mongo=1 \
     --scale mongo_express=1 \
     --scale postgres=1 \

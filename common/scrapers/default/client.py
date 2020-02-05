@@ -114,6 +114,7 @@ class ScraperClient:
     def download_url(self, configuration: str, url: str, expires: int) -> dict:
         response = {
             'cache': None,
+            'cache_age': None,
             'code': None,
             'download_time': None,
             'error': None,
@@ -122,8 +123,9 @@ class ScraperClient:
             'timestamp': None
         }
 
-        html, path, timestamp = self.cache.get(configuration, url, expires)
+        html, path, timestamp, cache_age = self.cache.get(configuration, url, expires)
 
+        response['cache_age'] = cache_age
         response['html'] = html
         response['path'] = path
         response['timestamp'] = timestamp
@@ -231,6 +233,7 @@ class ScraperClient:
             page_for_downloading = {
                 'configuration': configuration_name,
                 'expires': expires,
+                'parent_url': url,
                 'stage': stage_name,
                 'url': sub_url
             }
@@ -240,6 +243,7 @@ class ScraperClient:
     def index_stats(self, configuration_name: str, body_json: dict, response: dict):
         stats = {
             'cache': response['cache'],
+            'cache_age': response['cache_age'],
             'code': response['code'],
             'configuration': configuration_name,
             'download_time': response['download_time'],
@@ -289,6 +293,9 @@ class ScraperClient:
                             'timestamp': response['timestamp'],
                             'url': body_json['url']
                         }
+
+                        if 'parent_url' in body_json:
+                            page_for_indexing['parent_url'] = body_json['parent_url']
 
                         self.queue_page_for_indexing('pages', page_for_indexing)
 

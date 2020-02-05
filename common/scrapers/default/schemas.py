@@ -8,6 +8,9 @@ message_downloader = {
             'type': 'integer',
             'minimum': 0
         },
+        'parent_url': {
+            'type': 'string'
+        },
         'stage': {
             'type': 'string'
         },

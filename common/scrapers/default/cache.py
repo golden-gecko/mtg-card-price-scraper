@@ -13,17 +13,17 @@ class ScraperCache:
 
         self.directory = directory
 
-    def get(self, prefix: str, name: str, expiration_time: int):
+    def get(self, prefix: str, name: str, expiration_time: int) -> tuple:
         self.logger.debug('ScraperCache.get(%s, %s, %s)', prefix, name, expiration_time)
 
         path = self.get_path(prefix, name)
 
         if not os.path.exists(path):
-            return None, None, None
+            return None, None, None, None
 
         for root, _, files in os.walk(path):
             if not len(files):
-                return None, None, None
+                return None, None, None, None
 
             files = sorted(files, reverse=True)
 
@@ -35,11 +35,11 @@ class ScraperCache:
             self.logger.warning('Cache is %d seconds old', total_seconds)
 
             if total_seconds > expiration_time:
-                return None, None, None
+                return None, None, None, total_seconds
 
-            return load_file(path), path, path_time.isoformat()
+            return load_file(path), path, path_time.isoformat(), total_seconds
 
-        return None, None, None
+        return None, None, None, None
 
     def get_path(self, prefix: str, name: str) -> str:
         return os.path.join(self.directory, prefix, get_hash(name))
