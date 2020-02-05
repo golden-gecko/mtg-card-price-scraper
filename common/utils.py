@@ -1,4 +1,5 @@
 import hashlib
+import json
 import os
 import requests
 import shutil
@@ -151,6 +152,10 @@ def get_queue_name(name: str, type: str) -> str:
 
 def get_default_expiration_time() -> int:
     return ExpirationTime.month
+
+
+def sort_keys(value: dict) -> dict:
+    return json.loads(json.dumps(value, sort_keys=True))
 
 
 class ExecutionTime:

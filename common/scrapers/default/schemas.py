@@ -44,20 +44,31 @@ message_parser = {
 message_indexer = {
     'type': 'object',
     'properties': {
-        'attributes': {
-            'type': 'object'
+        'data': {
+            'type': 'object',
+            'properties': {
+                'attributes': {
+                    'type': 'object'
+                },
+                'configuration': {
+                    'type': 'string'
+                },
+                'stage': {
+                    'type': 'string'
+                },
+                'url': {
+                    'type': 'string'
+                }
+            },
+            'required': [
+                'configuration', 'stage', 'url'
+            ]
         },
-        'configuration': {
-            'type': 'string'
-        },
-        'stage': {
-            'type': 'string'
-        },
-        'url': {
+        'index': {
             'type': 'string'
         }
     },
     'required': [
-        'attributes', 'configuration', 'stage'
+        'data', 'index'
     ]
 }
