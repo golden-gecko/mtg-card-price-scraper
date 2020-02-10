@@ -76,7 +76,8 @@ class ScraperClient:
                                 'url': url
                             }
 
-                            self.queue_page_for_downloading(page_for_downloading)
+                            if not self.db.has_page(configuration_name, step['stage'], url):
+                                self.queue_page_for_downloading(page_for_downloading)
 
     def get_configuration_by_name(self, name: str) -> ScraperConfiguration:
         for configuration in self.configurations:
@@ -210,7 +211,8 @@ class ScraperClient:
                 'url': url
             }
 
-            self.queue_page_for_indexing('versions', attributes_for_indexing)
+            if not self.db.has_version(configuration_name, stage_name, cache_path):
+                self.queue_page_for_indexing('versions', attributes_for_indexing)
 
         return data
 
@@ -238,9 +240,10 @@ class ScraperClient:
                 'url': sub_url
             }
 
-            self.queue_page_for_downloading(page_for_downloading)
+            if not self.db.has_page(configuration_name, stage_name, sub_url):
+                self.queue_page_for_downloading(page_for_downloading)
 
-    def index_stats(self, configuration_name: str, body_json: dict, response: dict):
+    def index_statistics(self, configuration_name: str, body_json: dict, response: dict):
         stats = {
             'cache': response['cache'],
             'cache_age': response['cache_age'],
@@ -256,10 +259,10 @@ class ScraperClient:
 
         self.logger.debug('stats: %s', stats)
 
-        self.db.index_stats(stats)
+        self.db.index_statistics(stats)
 
     def process_downloaders(self, channel, method_frame, header_frame, body):
-        with ExecutionTime('Processing ({})'.format(method_frame.routing_key)):
+        with ExecutionTime('Processing ({})'.format(method_frame.routing_key), self.db):
             self.logger.debug('Received message "%s" from queue "%s"', body, method_frame.routing_key)
 
             body_json = body.decode('utf-8')
@@ -282,9 +285,9 @@ class ScraperClient:
                 with ExecutionTime('Downloading page'):
                     response = self.download_url(configuration_name, body_json['url'], body_json['expires'])
 
-                    self.logger.debug('response: %s', response)
+                    # self.logger.debug('response: %s', response)
 
-                    self.index_stats(configuration_name, body_json, response)
+                    self.index_statistics(configuration_name, body_json, response)
 
                     if response['html']:
                         page_for_indexing = {
@@ -297,7 +300,8 @@ class ScraperClient:
                         if 'parent_url' in body_json:
                             page_for_indexing['parent_url'] = body_json['parent_url']
 
-                        self.queue_page_for_indexing('pages', page_for_indexing)
+                        if not self.db.has_page(configuration_name, body_json['stage'], body_json['url']):
+                            self.queue_page_for_indexing('pages', page_for_indexing)
 
                         page_for_parsing = {
                             'cache_path': response['path'],
@@ -320,7 +324,7 @@ class ScraperClient:
                 self.queue.ack(method_frame.delivery_tag)
 
     def process_parsers(self, channel, method_frame, header_frame, body):
-        with ExecutionTime('Processing ({})'.format(method_frame.routing_key)):
+        with ExecutionTime('Processing ({})'.format(method_frame.routing_key), self.db):
             self.logger.debug('Received message "%s" from queue "%s"', body, method_frame.routing_key)
 
             body_json = body.decode('utf-8')
@@ -369,7 +373,8 @@ class ScraperClient:
                                 'url': url
                             }
 
-                            self.queue_page_for_downloading(page_for_downloading)
+                            if not self.db.has_page(configuration_name, step['stage'], url):
+                                self.queue_page_for_downloading(page_for_downloading)
 
                     self.logger.debug('Message processed')
             except Exception as e:
@@ -382,7 +387,7 @@ class ScraperClient:
                 self.queue.ack(method_frame.delivery_tag)
 
     def process_indexers(self, channel, method_frame, header_frame, body):
-        with ExecutionTime('Processing ({})'.format(method_frame.routing_key)):
+        with ExecutionTime('Processing ({})'.format(method_frame.routing_key), self.db):
             self.logger.debug('Received message "%s" from queue "%s"', body, method_frame.routing_key)
 
             body_json = body.decode('utf-8')
@@ -396,9 +401,11 @@ class ScraperClient:
 
                 try:
                     if body_json['index'] == 'pages':
-                        self.db.index_page(body_json['data'])
+                        with ExecutionTime('Indexing page', self.db):
+                            self.db.index_page(body_json['data'])
                     elif body_json['index'] == 'versions':
-                        self.db.index_version(body_json['data'])
+                        with ExecutionTime('Indexing version', self.db):
+                            self.db.index_version(body_json['data'])
                     else:
                         raise Exception('Invalid index: %s', body_json['index'])
                 except DuplicateKeyError as e:
@@ -431,4 +438,5 @@ class ScraperClient:
     def queue_value(self, queue, value):
         self.logger.debug('ScraperClient.queue_value(%s, %s)', queue, value)
 
-        self.queue.publish(queue, value)
+        with ExecutionTime('Queuing', self.db):
+            self.queue.publish(queue, value)

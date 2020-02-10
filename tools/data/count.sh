@@ -11,4 +11,4 @@ COMMAND='
     done
 '
 
-docker run -it --volume cenykart_dev:/data ${IMAGE} bash -c "${COMMAND}"
+docker run -it --volume cenykart_scraper_mtg:/data ${IMAGE} bash -c "${COMMAND}"

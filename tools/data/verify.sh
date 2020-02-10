@@ -9,7 +9,7 @@ docker build -f tools/Dockerfile -t ${IMAGE} .
 
 docker run \
     --interactive \
-    --volume cenykart_dev:/data \
+    --volume cenykart_scraper_mtg:/data \
     --tty \
     ${IMAGE} \
     bash -c "python3 /usr/local/app/data/verify.py"

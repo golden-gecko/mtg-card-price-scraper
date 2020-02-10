@@ -52,16 +52,21 @@ class ScraperDb:
             'url': url
         })
 
-    def has_version(self, cache_path: str):
+    def has_version(self, configuration: str, stage: str, cache_path: str):
         return self.db.pages.find_one({
-            'versions.cache.path': cache_path
+            'configuration': configuration,
+            'stage': stage,
+            'cache_path': cache_path
         })
 
     def index_page(self, data: dict) -> InsertOneResult:
         return self.db.pages.insert_one(sort_keys(data))
 
-    def index_stats(self, data: dict):
-        self.stats.index(index='stats', body=data)
+    def index_processing_time(self, data: dict):
+        return self.stats.index(index='processing_times', body=data)
+
+    def index_statistics(self, data: dict):
+        return self.stats.index(index='stats', body=data)
 
     def index_version(self, data: dict) -> InsertOneResult:
         return self.db.versions.insert_one(sort_keys(data))
