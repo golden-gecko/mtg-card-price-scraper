@@ -7,6 +7,6 @@ COPY common/requirements.txt .
 RUN pip3 install -r requirements.txt
 
 COPY common .
-COPY scraper_mtg .
+COPY scraper_parser .
 
 CMD ["python3", "app.py"]

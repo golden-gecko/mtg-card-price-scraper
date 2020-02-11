@@ -95,59 +95,5 @@ configurations = [
                 ]
             }
         ]
-    },
-    {
-        'name': 'shop',
-        'stages': [
-            {
-                'name': 'init',
-                'steps': [
-                    {
-                        'stage': 'main',
-                        'urls': [
-                            'http://10.10.0.20/'
-                        ]
-                    }
-                ]
-            },
-            {
-                'name': 'main',
-                'expires': ExpirationTime.hour,
-                'steps': [
-                    {
-                        'stage': 'category',
-                        'selectors': [
-                            '.category a'
-                        ]
-                    }
-                ]
-            },
-            {
-                'name': 'category',
-                'expires': ExpirationTime.hour,
-                'steps': [
-                    {
-                        'stage': 'product',
-                        'selectors': [
-                            '.product a'
-                        ]
-                    }
-                ]
-            },
-            {
-                'name': 'product',
-                'expires': ExpirationTime.minute,
-                'steps': [
-                    {
-                        'attributes': {
-                            'name': '.name',
-                            'price': mock_product_get_price,
-                            'condition': mock_product_get_condition,
-                            'quantity': '.quantity'
-                        }
-                    }
-                ]
-            }
-        ]
     }
 ]

@@ -165,10 +165,38 @@ services:
     volumes:
       - scraper_gatherer:/data
 
-  scraper_mtg:
+  scraper_downloader:
     build:
       context: .
-      dockerfile: scraper_mtg/Dockerfile
+      dockerfile: scraper_downloader/Dockerfile
+    depends_on:
+      - elasticsearch
+      - mongo
+      - rabbit
+    env_file:
+      - .env
+    restart: unless-stopped
+    volumes:
+      - scraper_mtg:/data
+
+  scraper_indexer:
+    build:
+      context: .
+      dockerfile: scraper_indexer/Dockerfile
+    depends_on:
+      - elasticsearch
+      - mongo
+      - rabbit
+    env_file:
+      - .env
+    restart: unless-stopped
+    volumes:
+      - scraper_mtg:/data
+
+  scraper_parser:
+    build:
+      context: .
+      dockerfile: scraper_parser/Dockerfile
     depends_on:
       - elasticsearch
       - mongo

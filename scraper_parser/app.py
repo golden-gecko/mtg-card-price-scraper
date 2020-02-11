@@ -1,7 +1,7 @@
 import threading
 
 from configurations import cardmarket, cardstore, centrum_mtg, channelfireball, e_legion, flamberg, futurex, \
-    gamesmasters, morigal, mtgstore, planeswalker, strefamtg, test
+    gamesmasters, morigal, mtgstore, planeswalker, strefamtg
 from log import get_logger
 from scrapers.default.cache import ScraperCache
 from scrapers.default.client import ScraperConfiguration, ScraperClient
@@ -21,6 +21,7 @@ def process_pages(configuration):
 
     scraper = ScraperClient(cache=cache, db=db, queue=queue)
     scraper.add_configuration(ScraperConfiguration(configuration))
+    scraper.enable_parser()
     scraper.process()
 
     logger.info('Thread "%s" exiting...', configuration['name'])
