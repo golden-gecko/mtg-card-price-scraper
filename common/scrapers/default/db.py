@@ -20,6 +20,16 @@ class ScraperDb:
 
         self.stats = Elasticsearch([{'host': config.ELASTIC_HOST, 'port': config.ELASTIC_PORT}])
 
+    def get_root_pages(self):
+        return self.db.pages.find({
+            'parent_url': {
+                '$exists': False
+            }
+        }).sort([
+            ('configuration', ASCENDING),
+            ('stage', ASCENDING)
+        ])
+
     def get_statistics(self):
         cursor = self.db.pages.aggregate([
             {
@@ -53,7 +63,7 @@ class ScraperDb:
         })
 
     def has_version(self, configuration: str, stage: str, cache_path: str):
-        return self.db.pages.find_one({
+        return self.db.versions.find_one({
             'configuration': configuration,
             'stage': stage,
             'cache_path': cache_path

@@ -30,39 +30,21 @@ def process_pages(configuration):
 def main():
     logger.info('Service starting...')
 
-    """
-    http://www.starcitygames.com/
-    https://www.mtggoldfish.com/
-    https://www.mtgrom.pl/
-    https://isa.pl/k413-Single-MTG.html
-    https://www.olx.pl/
-    https://allegro.pl/
-    http://www.swistak.pl/
-    https://www.ebay.pl/
-    """
-
     try:
         configurations = []
 
-        """
         configurations += cardmarket.configurations
+        configurations += cardstore.configurations
+        configurations += centrum_mtg.configurations
         configurations += channelfireball.configurations
+        configurations += e_legion.configurations
         configurations += flamberg.configurations
         configurations += futurex.configurations
         configurations += gamesmasters.configurations
         configurations += morigal.configurations
         configurations += mtgstore.configurations
-        """
-
-        configurations += cardstore.configurations
-        configurations += centrum_mtg.configurations
-        configurations += e_legion.configurations
         configurations += planeswalker.configurations
         configurations += strefamtg.configurations
-
-        """
-        configurations += test.configurations
-        """
 
         threads = []
 

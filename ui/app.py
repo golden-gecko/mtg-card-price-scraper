@@ -10,6 +10,7 @@ from routes.auth import blueprint as auth_blueprint
 from routes.card import blueprint as card_blueprint
 from routes.contact import blueprint as contact_blueprint
 from routes.index import blueprint as index_blueprint
+from routes.parser import blueprint as parser_blueprint
 from routes.profile import blueprint as profile_blueprint
 from routes.register import blueprint as register_blueprint
 from routes.search import blueprint as search_blueprint
@@ -27,6 +28,7 @@ app.register_blueprint(auth_blueprint)
 app.register_blueprint(card_blueprint)
 app.register_blueprint(contact_blueprint)
 app.register_blueprint(index_blueprint)
+app.register_blueprint(parser_blueprint)
 app.register_blueprint(profile_blueprint)
 app.register_blueprint(register_blueprint)
 app.register_blueprint(search_blueprint)

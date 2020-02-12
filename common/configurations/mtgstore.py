@@ -6,38 +6,64 @@ from utils import ExpirationTime
 
 logger = get_logger()
 
-configurations = {
-    'mtgstore': {
-        'init': [
+configurations = [
+    {
+        'name': 'mtgstore',
+        'stages': [
             {
-                'stage': 'main',
-                'url': 'http://www.mtgstore.pl/index.php'
-            }
-        ],
-        'main': [
-            {
-                'stage': 'category',
-                'selector': '.box_kont .boxLink'
-            }
-        ],
-        'category': [
-            {
-                'stage': 'category',
-                'selector': '.inContent .pageResults'
+                'name': 'init',
+                'steps': [
+                    {
+                        'stage': 'main',
+                        'urls': [
+                            'http://www.mtgstore.pl/index.php'
+                        ]
+                    }
+                ]
             },
             {
-                'stage': 'product',
-                'selector': '.ProductTile'
-            }
-        ],
-        'product': [
+                'name': 'main',
+                'expires': ExpirationTime.month,
+                'steps': [
+                    {
+                        'stage': 'category',
+                        'selectors': [
+                            '.box_kont .boxLink'
+                        ]
+                    }
+                ]
+            },
             {
-                'attributes': {
-                    'name': '.ProductInfoTile',
-                    'price': '#nowaCena',
-                    'quantity': 'tr:nth-child(2) .ProductHead:nth-child(2)'
-                }
+                'name': 'category',
+                'expires': ExpirationTime.month,
+                'steps': [
+                    {
+                        'stage': 'category',
+                        'selectors': [
+                            '.inContent .pageResults'
+                        ]
+                    },
+                    {
+                        'stage': 'product',
+                        'selectors': [
+                            '.ProductTile'
+                        ]
+                    }
+                ]
+            },
+            {
+                'name': 'product',
+                'expires': ExpirationTime.month,
+                'steps': [
+                    {
+                        'attributes': {
+                            'name': '.ProductInfoTile',
+                            'price': '#nowaCena',
+                            'quantity': 'tr:nth-child(2) .ProductHead:nth-child(2)'
+                        }
+                    }
+                ]
             }
         ]
     }
-}
+]

@@ -58,13 +58,13 @@ configurations = [
                     {
                         'stage': 'category',
                         'selectors': [
-                            '.paginator a'
+                            '#box_mainproducts .paginator a'
                         ]
                     },
                     {
                         'stage': 'product',
                         'selectors': [
-                            '.products .prodimage'
+                            '#box_mainproducts .products .prodimage'
                         ]
                     }
                 ]

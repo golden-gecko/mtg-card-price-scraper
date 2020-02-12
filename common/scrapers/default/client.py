@@ -72,6 +72,10 @@ class ScraperClient:
 
             self.logger.debug('configuration_name: %s', configuration_name)
 
+            self.queue.declare(get_queue_name(configuration_name, 'downloader'))
+            self.queue.declare(get_queue_name(configuration_name, 'parser'))
+            self.queue.declare(get_queue_name(configuration_name, 'indexer'))
+
             if self.downloader:
                 self.queue.add_callback(get_queue_name(configuration_name, 'downloader'), self.process_downloaders)
 
@@ -94,8 +98,7 @@ class ScraperClient:
                                 'url': url
                             }
 
-                            if not self.db.has_page(configuration_name, step['stage'], url):
-                                self.queue_page_for_downloading(page_for_downloading)
+                            self.queue_page_for_downloading(page_for_downloading)
 
     def get_configuration_by_name(self, name: str) -> ScraperConfiguration:
         for configuration in self.configurations:
@@ -229,8 +232,7 @@ class ScraperClient:
                 'url': url
             }
 
-            if not self.db.has_version(configuration_name, stage_name, cache_path):
-                self.queue_page_for_indexing('versions', attributes_for_indexing)
+            self.queue_page_for_indexing('versions', attributes_for_indexing)
 
         return data
 
@@ -258,8 +260,7 @@ class ScraperClient:
                 'url': sub_url
             }
 
-            if not self.db.has_page(configuration_name, stage_name, sub_url):
-                self.queue_page_for_downloading(page_for_downloading)
+            self.queue_page_for_downloading(page_for_downloading)
 
     def index_statistics(self, configuration_name: str, body_json: dict, response: dict):
         stats = {
@@ -318,8 +319,7 @@ class ScraperClient:
                         if 'parent_url' in body_json:
                             page_for_indexing['parent_url'] = body_json['parent_url']
 
-                        if not self.db.has_page(configuration_name, body_json['stage'], body_json['url']):
-                            self.queue_page_for_indexing('pages', page_for_indexing)
+                        self.queue_page_for_indexing('pages', page_for_indexing)
 
                         page_for_parsing = {
                             'cache_path': response['path'],
@@ -330,6 +330,8 @@ class ScraperClient:
                         }
 
                         self.queue_page_for_parsing(page_for_parsing)
+                    else:
+                        raise ScraperProcessingException('Failed to download page "{}"'.format(body_json['url']))
 
                     self.logger.debug('Message processed')
             except Exception as e:
@@ -391,8 +393,7 @@ class ScraperClient:
                                 'url': url
                             }
 
-                            if not self.db.has_page(configuration_name, step['stage'], url):
-                                self.queue_page_for_downloading(page_for_downloading)
+                            self.queue_page_for_downloading(page_for_downloading)
 
                     self.logger.debug('Message processed')
             except Exception as e:
@@ -419,10 +420,10 @@ class ScraperClient:
 
                 try:
                     if body_json['index'] == 'pages':
-                        with ExecutionTime('Indexing page', self.db):
+                        if not self.db.has_page(body_json['data']['configuration'], body_json['data']['stage'], body_json['data']['url']):
                             self.db.index_page(body_json['data'])
                     elif body_json['index'] == 'versions':
-                        with ExecutionTime('Indexing version', self.db):
+                        if not self.db.has_version(body_json['data']['configuration'], body_json['data']['stage'], body_json['data']['cache_path']):
                             self.db.index_version(body_json['data'])
                     else:
                         raise Exception('Invalid index: %s', body_json['index'])
@@ -443,7 +444,8 @@ class ScraperClient:
         self.queue_value(get_queue_name(data['configuration'], 'downloader'), json.dumps(data))
 
     def queue_page_for_parsing(self, data: dict):
-        self.queue_value(get_queue_name(data['configuration'], 'parser'), json.dumps(data))
+        if not self.db.has_version(data['configuration'], data['stage'], data['cache_path']):
+            self.queue_value(get_queue_name(data['configuration'], 'parser'), json.dumps(data))
 
     def queue_page_for_indexing(self, index: str, data: dict):
         body = {

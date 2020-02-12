@@ -8,44 +8,50 @@ logger = get_logger()
 
 configurations = [
     {
-        'name': 'cardmarket',
+        'name': 'gatherer',
         'stages': [
             {
                 'name': 'init',
                 'steps': [
                     {
-                        'stage': 'category',
+                        'stage': 'page',
                         'urls': [
-                            'https://www.cardmarket.com/en/Magic/Products/Singles?idCategory=1&idExpansion=0&idRarity=0&sortBy=name_asc&perSite=20'
+                            'https://gatherer.wizards.com/Pages/Search/Default.aspx?sort=cn+&page=0&name=%20[]'
                         ]
                     }
                 ]
             },
             {
-                'name': 'category',
+                'name': 'page',
                 'expires': ExpirationTime.month,
                 'steps': [
                     {
-                        'stage': 'category',
+                        'stage': 'page',
                         'selectors': [
-                            '#pagination .has-content-centered .btn'
+                            '#ctl00_ctl00_ctl00_MainContent_SubContent_topPagingControlsContainer a'
                         ]
                     },
                     {
-                        'stage': 'product',
+                        'stage': 'card',
                         'selectors': [
-                            '.table-body .row.no-gutters .col .row.no-gutters a'
+                            '.cardItemTable .cardTitle a'
                         ]
                     }
                 ]
             },
             {
-                'name': 'product',
+                'name': 'card',
                 'expires': ExpirationTime.month,
                 'steps': [
                     {
+                        'stage': 'card',
+                        'selectors': [
+                            '#ctl00_ctl00_ctl00_MainContent_SubContent_SubContent_otherSetsValue a'
+                        ]
+                    },
+                    {
                         'attributes': {
-                            'name': '.page-title-container h1'
+                            'name': '#ctl00_ctl00_ctl00_MainContent_SubContent_SubContentHeader_subtitleDisplay'
                         }
                     }
                 ]
