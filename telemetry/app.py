@@ -1,9 +1,6 @@
 import psutil
-import tcp_latency
 
-from elasticsearch import Elasticsearch
-
-import config
+from prometheus_client import Gauge, start_http_server
 
 from log import get_logger
 from utils import get_timestamp, wait
@@ -13,24 +10,23 @@ if __name__ == '__main__':
     logger = get_logger()
     logger.info('Processing starting...')
 
-    telemetry = Elasticsearch([{'host': config.ELASTIC_HOST, 'port': config.ELASTIC_PORT}])
+    cpu_usage = Gauge('cpu_usage', '')
+    memory_usage = Gauge('memory_usage', '')
+
+    start_http_server(8000)
 
     while True:
         try:
             logger.info('Gathering data...')
 
-            data = {
-                'cpu': psutil.cpu_percent(),
-                'memory': psutil.virtual_memory()._asdict()['percent'],
-                # 'network_latency': tcp_latency.measure_latency('google.pl')[0],
-                'timestamp': get_timestamp()
-            }
+            cpu_usage.set(psutil.cpu_percent())
+            memory_usage.set(psutil.virtual_memory()._asdict()['percent'])
 
+            """
             for x in psutil.sensors_temperatures()['coretemp']:
                 data['core_temp_{}'.format(x.label.replace('Core ', ''))] = x.current
+            """
 
-            telemetry.index(index='telemetry', body=data)
-
-            wait(60.0)
+            wait(1.0)
         except KeyError as e:
             logger.warning('Processing stopped: %s', e)

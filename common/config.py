@@ -25,6 +25,9 @@ POSTGRES_PASSWORD = 'ca978112ca1bbdcafac2'
 POSTGRES_PORT = int(os.environ.get('POSTGRES_PORT'))
 POSTGRES_USER = 'cenykart'
 
+PROMETHEUS_HOST = os.environ.get('PROMETHEUS_HOST')
+PROMETHEUS_PORT = int(os.environ.get('PROMETHEUS_PORT'))
+
 RABBIT_HOST = os.environ.get('RABBIT_HOST')
 RABBIT_PORT = int(os.environ.get('RABBIT_PORT'))
 

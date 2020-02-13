@@ -61,6 +61,22 @@ services:
     volumes:
       - elasticsearch:/usr/share/elasticsearch/data
 
+  grafana:
+    depends_on:
+      - prometheus
+    env_file:
+      - .env
+    image: grafana/grafana:5.4.3
+    networks:
+      default:
+        ipv4_address: ${GRAFANA_HOST}
+    ports:
+      - ${GRAFANA_PORT}:${GRAFANA_PORT}
+    restart: unless-stopped
+    volumes:
+      - grafana_etc:/etc/grafana
+      - grafana_var_lib:/var/lib/grafana
+
   kibana:
     depends_on:
       - elasticsearch
@@ -135,6 +151,19 @@ services:
     restart: unless-stopped
     volumes:
       - postgres:/var/lib/postgresql/data
+
+  prometheus:
+    env_file:
+      - .env
+    image: prom/prometheus:v2.15.2
+    networks:
+      default:
+        ipv4_address: ${PROMETHEUS_HOST}
+    ports:
+      - ${PROMETHEUS_PORT}:${PROMETHEUS_PORT}
+    restart: unless-stopped
+    volumes:
+      - prometheus:/etc/prometheus
 
   rabbit:
     build:
@@ -254,6 +283,9 @@ services:
       - elasticsearch
     env_file:
       - .env
+    networks:
+      default:
+        ipv4_address: ${TELEMETRY_HOST}
     restart: unless-stopped
 
   ui:
@@ -280,11 +312,14 @@ services:
 volumes:
   consul:
   elasticsearch:
+  grafana_etc:
+  grafana_var_lib:
   kibana:
   mongo_configdb:
   mongo_db:
   postgres:
   rabbit:
   redis:
+  prometheus:
   scraper_gatherer:
   scraper_mtg:
