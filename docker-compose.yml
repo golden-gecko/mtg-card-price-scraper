@@ -15,10 +15,8 @@ services:
       context: .
       dockerfile: api/Dockerfile
     depends_on:
-      - elasticsearch
       - mongo
       - postgres
-      - redis
     env_file:
       - .env
     healthcheck:
@@ -124,6 +122,15 @@ services:
       - mongo_configdb:/data/configdb
       - mongo_db:/data/db
 
+  node_exporter:
+    env_file:
+      - .env
+    image: prom/node-exporter:v0.18.1
+    networks:
+      default:
+        ipv4_address: ${NODE_EXPORTER_HOST}
+    restart: unless-stopped
+
   mongo_express:
     depends_on:
       - mongo
@@ -208,11 +215,13 @@ services:
       context: .
       dockerfile: scraper_downloader/Dockerfile
     depends_on:
-      - elasticsearch
       - mongo
       - rabbit
     env_file:
       - .env
+    networks:
+      default:
+        ipv4_address: ${SCRAPER_DOWNLOADER}
     restart: unless-stopped
     volumes:
       - scraper_mtg:/data
@@ -222,11 +231,13 @@ services:
       context: .
       dockerfile: scraper_indexer/Dockerfile
     depends_on:
-      - elasticsearch
       - mongo
       - rabbit
     env_file:
       - .env
+    networks:
+      default:
+        ipv4_address: ${SCRAPER_INDEXER}
     restart: unless-stopped
     volumes:
       - scraper_mtg:/data
@@ -236,11 +247,13 @@ services:
       context: .
       dockerfile: scraper_parser/Dockerfile
     depends_on:
-      - elasticsearch
       - mongo
       - rabbit
     env_file:
       - .env
+    networks:
+      default:
+        ipv4_address: ${SCRAPER_PARSER}
     restart: unless-stopped
     volumes:
       - scraper_mtg:/data
@@ -279,8 +292,6 @@ services:
     build:
       context: .
       dockerfile: telemetry/Dockerfile
-    depends_on:
-      - elasticsearch
     env_file:
       - .env
     networks:

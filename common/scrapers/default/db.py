@@ -1,4 +1,3 @@
-from elasticsearch import Elasticsearch
 from pymongo import ASCENDING, MongoClient
 from pymongo.results import InsertOneResult
 
@@ -17,8 +16,6 @@ class ScraperDb:
         self.db = self.client[database]
         self.db.pages.create_index([('configuration', ASCENDING), ('stage', ASCENDING), ('url', ASCENDING)], unique=True)
         self.db.versions.create_index([('configuration', ASCENDING), ('stage', ASCENDING), ('cache_path', ASCENDING)], unique=True)
-
-        self.stats = Elasticsearch([{'host': config.ELASTIC_HOST, 'port': config.ELASTIC_PORT}])
 
     def get_root_pages(self):
         return self.db.pages.find({
@@ -71,12 +68,6 @@ class ScraperDb:
 
     def index_page(self, data: dict) -> InsertOneResult:
         return self.db.pages.insert_one(sort_keys(data))
-
-    def index_processing_time(self, data: dict):
-        return self.stats.index(index='processing_times', body=data)
-
-    def index_statistics(self, data: dict):
-        return self.stats.index(index='stats', body=data)
 
     def index_version(self, data: dict) -> InsertOneResult:
         return self.db.versions.insert_one(sort_keys(data))

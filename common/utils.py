@@ -158,8 +158,40 @@ def sort_keys(value: dict) -> dict:
     return json.loads(json.dumps(value, sort_keys=True))
 
 
+def get_configurations():
+    from configurations import \
+        cardmarket, \
+        cardstore, \
+        centrum_mtg, \
+        channelfireball, \
+        e_legion, \
+        flamberg, futurex, \
+        gamesmasters, \
+        morigal, \
+        mtgstore, \
+        planeswalker, \
+        strefamtg
+
+    configurations = []
+
+    configurations += cardmarket.configurations
+    configurations += cardstore.configurations
+    configurations += centrum_mtg.configurations
+    configurations += channelfireball.configurations
+    configurations += e_legion.configurations
+    configurations += flamberg.configurations
+    configurations += futurex.configurations
+    configurations += gamesmasters.configurations
+    configurations += morigal.configurations
+    configurations += mtgstore.configurations
+    configurations += planeswalker.configurations
+    configurations += strefamtg.configurations
+
+    return configurations
+
+
 class ExecutionTime:
-    def __init__(self, name: str, db = None):
+    def __init__(self, name: str, db=None):
         self.name = name
         self.start = None
         self.db = db
