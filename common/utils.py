@@ -7,6 +7,7 @@ import time
 import uuid
 
 from datetime import datetime
+from prometheus_client import Gauge
 from requests.exceptions import ConnectionError
 from urllib3.exceptions import MaxRetryError
 
@@ -191,10 +192,10 @@ def get_configurations():
 
 
 class ExecutionTime:
-    def __init__(self, name: str, db=None):
+    def __init__(self, name: str, gauge: Gauge = None):
         self.name = name
         self.start = None
-        self.db = db
+        self.gauge = gauge
 
     def __enter__(self):
         self.start = get_time()
@@ -204,11 +205,5 @@ class ExecutionTime:
 
         logger.debug('%s took %s seconds', self.name, get_duration(self.start))
 
-        if self.db:
-            data = {
-                'name': self.name,
-                'processing_time': duration,
-                'timestamp': get_timestamp()
-            }
-
-            self.db.index_processing_time(data)
+        if self.gauge:
+            self.gauge.set(duration)
