@@ -6,16 +6,22 @@
     <a href="/card/{{ card.card_id }}" title="{{ card.oracle.name }}">{{ content }}</a>
 {%- endmacro %}
 
-{% macro search_option(name, class, items) -%}
+{% macro search_option(name, class, items, value, empty=True) -%}
     <div class="form-group row">
         <label for="search-{{ class }}" class="col col-form-label">{{ name }}</label>
         <div class="col">
             <select id="search-{{ class }}" class="form-control" name="{{ class }}">
-                <option value=""></option>
+                {% if empty %}
+                    <option value=""></option>
+                {% endif %}
 
                 {% if items %}
                     {% for item in items %}
-                        <option value="{{ item.name }}">{{ item.name }}</option>
+                        {% if item.name == value %}
+                            <option value="{{ item.name }}" selected>{{ item.name }}</option>
+                        {% else %}
+                            <option value="{{ item.name }}">{{ item.name }}</option>
+                        {% endif %}
                     {% endfor %}
                 {% endif %}
             </select>

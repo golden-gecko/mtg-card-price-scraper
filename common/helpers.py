@@ -22,14 +22,21 @@ def create_response(code: int = HTTPStatus.OK, message: str = '', data=None) -> 
     return jsonify(response), code
 
 
-def make_url(host: str, params: [list, str, None] = None) -> str:
+def make_url(host: str, params: [list, str, None] = None, query: [dict, None] = None) -> str:
     if params:
         if not isinstance(params, list):
             params = [params]
 
         params = [str(x) for x in params]
 
-    return urljoin(host, '/'.join(params))
+    if query:
+        url = urljoin(host, '/'.join(params))
+        query = '&'.join(['{}={}'.format(k, v) for k, v in query.items()])
+
+        return '{}?{}'.format(url, query)
+    else:
+        return urljoin(host, '/'.join(params))
+
 
 
 def send_delete(url: str, headers=None, params=None) -> Response:

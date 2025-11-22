@@ -5,18 +5,12 @@ from sqlalchemy import and_
 
 from helpers import create_response
 from models import db, User
-from schemas import validate_user
 
 
 def route_login():
-    status, message, data = validate_user(request.get_json())
-
-    if not status:
-        return create_response(HTTPStatus.BAD_REQUEST, message=message)
-
     user = db.session.query(User).filter(and_(
-        User.email == data['email'],
-        User.password_hash == data['password_hash']
+        User.email == request.json['email'],
+        User.password_hash == request.json['password_hash']
     )).one()
 
     if not user:

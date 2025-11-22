@@ -36,13 +36,16 @@ paths:
           application/json:
             schema:
               type: object
+              required: [email, password_hash]
               properties:
                 email:
                   type: string
+                  format: email
                   example: john@doe.com
                 password_hash:
                   type: string
-                  example: ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb
+                  minLength: 64
+                  maxLength: 64
       responses:
         200:
           description: Success
@@ -86,12 +89,16 @@ paths:
           application/json:
             schema:
               type: object
+              required: [email, password_hash]
               properties:
                 email:
                   type: string
+                  format: email
                   example: john@doe.com
                 password_hash:
                   type: string
+                  minLength: 64
+                  maxLength: 64
                   example: ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb
         required: true
       responses:
@@ -169,11 +176,6 @@ paths:
         description: Card color
         schema:
           type: string
-      - name: expansion
-        in: query
-        description: Expansion name
-        schema:
-          type: string
       - name: format
         in: query
         description: Format name
@@ -192,6 +194,11 @@ paths:
       - name: rarity
         in: query
         description: Card rarity
+        schema:
+          type: string
+      - name: set
+        in: query
+        description: Set name
         schema:
           type: string
       - name: subtype
@@ -249,19 +256,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response'
-  /mtg/expansions:
-    get:
-      tags:
-      - MTG
-      summary: Return expansion list
-      operationId: routes.mtg.expansions.route_get_expansions
-      responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response'
   /mtg/formats:
     get:
       tags:
@@ -281,6 +275,19 @@ paths:
       - MTG
       summary: Return rarity list
       operationId: routes.mtg.rarities.route_get_rarities
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /mtg/sets:
+    get:
+      tags:
+      - MTG
+      summary: Return set list
+      operationId: routes.mtg.sets.route_get_sets
       responses:
         200:
           description: Success

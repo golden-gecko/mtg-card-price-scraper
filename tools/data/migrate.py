@@ -6,6 +6,7 @@ import shutil
 
 from pymongo import MongoClient
 
+from helpers import make_url, send_post
 from scrapers.default.queue import ScraperQueue
 
 
@@ -258,4 +259,35 @@ def migrate_010():
         db.scraper.pages.update_one(page_query, versions_query)
 
 
-# migrate_011()
+def migrate_011():
+    db = MongoClient('192.168.0.162')
+
+    query = {
+        'main': {
+            '$exists': 0
+        }
+    }
+
+    query = {
+    }
+
+    cards = list(db.gatherer.cards.find(query))
+
+    for card in cards:
+        params = [
+            'scrapers',
+            'gatherer',
+            'cards',
+            card['card_id']
+        ]
+
+        query = {
+            'refresh': 'true'
+        }
+
+        response = send_post(make_url('http://192.168.0.162:8000/v1/', params, query))
+
+        print(response.status_code)
+
+
+migrate_011()

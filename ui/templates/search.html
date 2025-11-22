@@ -13,26 +13,16 @@
                     </div>
                 </div>
 
-                {{ search_option('Artists', 'artist', artists) }}
-                {{ search_option('Block', 'block', blocks) }}
-                {{ search_option('Color', 'color', colors) }}
-                {{ search_option('Expansion', 'expansion', expansions) }}
-                {{ search_option('Format', 'format', formats) }}
-                {{ search_option('Rarity', 'rarity', rarities) }}
-                {{ search_option('Subtype', 'subtype', subtypes) }}
-                {{ search_option('Type', 'type', types) }}
-                {{ search_option('Watermark', 'watermark', watermarks) }}
-
-                <div class="form-group row">
-                    <label for="search-limit" class="col col-form-label">Per page</label>
-                    <div class="col">
-                        <select id="search-limit" class="form-control"  name="limit">
-                            <option value="12">12</option>
-                            <option value="24">24</option>
-                            <option value="48">48</option>
-                        </select>
-                    </div>
-                </div>
+                {{ search_option('Artists', 'artist', search_options.artists, search_params.artist) }}
+                {{ search_option('Block', 'block', search_options.blocks, search_params.block) }}
+                {{ search_option('Color', 'color', search_options.colors, search_params.color) }}
+                {{ search_option('Format', 'format', search_options.formats, search_params.format) }}
+                {{ search_option('Rarity', 'rarity', search_options.rarities, search_params.rarity) }}
+                {{ search_option('Set', 'set', search_options.sets, search_params.set) }}
+                {{ search_option('Subtype', 'subtype', search_options.subtypes, search_params.subtype) }}
+                {{ search_option('Type', 'type', search_options.types, search_params.type) }}
+                {{ search_option('Watermark', 'watermark', search_options.watermarks, search_params.watermark) }}
+                {{ search_option('Per page', 'limit', search_options.limits, search_params.limit, False) }}
 
                 <div class="form-group row">
                     <div class="col">
@@ -69,10 +59,10 @@
                 this.search_form = $('#search-form');
                 this.search_block = this.search_form.find('#search-block');
                 this.search_color = this.search_form.find('#search-color');
-                this.search_expansion = this.search_form.find('#search-expansion');
                 this.search_format = this.search_form.find('#search-format');
                 this.search_rarity = this.search_form.find('#search-rarity');
                 this.search_name = this.search_form.find('#search-name');
+                this.search_set = this.search_form.find('#search-set');
                 this.search_subtype = this.search_form.find('#search-subtype');
                 this.search_type = this.search_form.find('#search-type');
                 this.search_button = this.search_form.find('#search-button');
@@ -88,7 +78,7 @@
 
                 // this.init_select('blocks', this.search_block);
                 // this.init_select('colors', this.search_color);
-                // this.init_select('expansions', this.search_expansion);
+                // this.init_select('sets', this.search_set);
                 // this.init_select('formats', this.search_format);
                 // this.init_select('rarities', this.search_rarity);
                 // this.init_select('subtypes', this.search_subtype);
