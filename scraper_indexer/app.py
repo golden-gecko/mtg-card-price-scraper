@@ -32,7 +32,6 @@ def main():
 
     try:
         statistics = ScraperStatistics()
-        statistics = None
 
         threads = []
 

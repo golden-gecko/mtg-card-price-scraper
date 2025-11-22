@@ -10,6 +10,8 @@ class ScraperStatistics:
         self.page_cache_age = Gauge('scraper_page_cache_age', '')
         self.page_download_total = Counter('scraper_page_download_total', '')
         self.page_download_time = Gauge('scraper_page_download_time', '')
+        self.page_parse_total = Counter('scraper_page_parse_total', '')
+        self.page_parse_time = Gauge('scraper_page_parse_time', '')
         self.page_index_total = Counter('scraper_page_index_total', '')
         self.page_index_time = Gauge('scraper_page_index_time', '')
 

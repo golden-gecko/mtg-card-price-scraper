@@ -282,8 +282,9 @@ class ScraperClient:
         }
 
         if self.statistics:
+            pass
             # self.statistics.page_cache_age.set(stats['cache_age'])
-            self.statistics.page_download_total.inc()
+            # self.statistics.page_download_total.inc()
             # self.statistics.page_download_time.set(stats['download_time'])
 
         self.logger.debug('stats: %s', stats)
@@ -291,7 +292,7 @@ class ScraperClient:
         # self.db.index_statistics(stats)
 
     def process_downloaders(self, channel, method_frame, header_frame, body):
-        with ExecutionTime('Processing ({})'.format(method_frame.routing_key)):
+        with ExecutionTime('Processing ({})'.format(method_frame.routing_key), self.statistics.page_download_time):
             self.logger.debug('Received message "%s" from queue "%s"', body, method_frame.routing_key)
 
             body_json = body.decode('utf-8')
@@ -354,7 +355,7 @@ class ScraperClient:
                 self.queue.ack(method_frame.delivery_tag)
 
     def process_parsers(self, channel, method_frame, header_frame, body):
-        with ExecutionTime('Processing ({})'.format(method_frame.routing_key)):
+        with ExecutionTime('Processing ({})'.format(method_frame.routing_key), self.statistics.page_parse_time):
             self.logger.debug('Received message "%s" from queue "%s"', body, method_frame.routing_key)
 
             body_json = body.decode('utf-8')
@@ -424,7 +425,7 @@ class ScraperClient:
                 self.queue.ack(method_frame.delivery_tag)
 
     def process_indexers(self, channel, method_frame, header_frame, body):
-        with ExecutionTime('Processing ({})'.format(method_frame.routing_key)):
+        with ExecutionTime('Processing ({})'.format(method_frame.routing_key), self.statistics.page_index_time):
             self.logger.debug('Received message "%s" from queue "%s"', body, method_frame.routing_key)
 
             body_json = body.decode('utf-8')
