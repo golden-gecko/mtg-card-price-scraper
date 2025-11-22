@@ -9,6 +9,7 @@ docker build -f tools/Dockerfile -t ${IMAGE} .
 
 docker run \
     --interactive \
+    --network cenykart_default \
     --volume cenykart_dev:/data \
     --tty \
     ${IMAGE} \

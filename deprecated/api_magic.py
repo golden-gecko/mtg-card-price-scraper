@@ -7,9 +7,9 @@ from scrapers.magic import MagicClient
 
 
 def route_cards(card_id):
-    mongo = MongoMagic(host='mongo')
+    mongo = MongoMagic()
 
-    rabbit = RabbitClient(host='rabbit')
+    rabbit = RabbitClient()
     rabbit.connect()
 
     magic = MagicClient(mongo=mongo, rabbit=rabbit)
@@ -23,9 +23,9 @@ def route_cards(card_id):
 
 
 def route_pages(page_id):
-    mongo = MongoMagic(host='mongo')
+    mongo = MongoMagic()
 
-    rabbit = RabbitClient(host='rabbit')
+    rabbit = RabbitClient()
     rabbit.connect()
 
     magic = MagicClient(mongo=mongo, rabbit=rabbit)

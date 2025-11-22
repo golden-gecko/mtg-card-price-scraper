@@ -2,7 +2,7 @@
 
 cd "$(dirname "$0")"
 
-IMAGE=FROM python:3.7.4-slim-buster
+IMAGE=python:3.8.1
 
 COMMAND='
     for i in $(ls /data)

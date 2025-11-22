@@ -19,8 +19,8 @@ function make_backup_mongo {
         bash -c "mkdir -p mongo && mongoexport --uri=${uri} --collection=${collection} | gzip > ${file_name}"
 }
 
-# make_backup_mongo gatherer cards
-# make_backup_mongo gatherer pages
+make_backup_mongo gatherer cards
+make_backup_mongo gatherer pages
 
-# make_backup_mongo scraper pages
-# make_backup_mongo scraper stats
+make_backup_mongo scraper pages
+make_backup_mongo scraper stats

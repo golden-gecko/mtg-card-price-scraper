@@ -3,7 +3,7 @@ from scrapers.gatherer.db import GathererDb
 
 
 def route_get_blocks():
-    db = GathererDb(host='mongo')
+    db = GathererDb()
 
     data = {
         'blocks': db.get_blocks()

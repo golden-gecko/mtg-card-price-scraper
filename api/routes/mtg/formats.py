@@ -3,7 +3,7 @@ from scrapers.gatherer.db import GathererDb
 
 
 def route_get_formats():
-    db = GathererDb(host='mongo')
+    db = GathererDb()
 
     data = {
         'formats': db.get_formats()

@@ -3,7 +3,7 @@ from scrapers.gatherer.db import GathererDb
 
 
 def route_get_types():
-    db = GathererDb(host='mongo')
+    db = GathererDb()
 
     data = {
         'types': db.get_types()

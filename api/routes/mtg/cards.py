@@ -5,7 +5,7 @@ from scrapers.gatherer.db import GathererDb
 
 
 def route_get_cards():
-    db = GathererDb(host='mongo')
+    db = GathererDb()
 
     params = {
         'all_versions': request.args.get('all_versions', default=False, type=bool),
@@ -38,7 +38,7 @@ def route_get_cards():
 
 
 def route_get_card_details(card_id: int):
-    db = GathererDb(host='mongo')
+    db = GathererDb()
 
     card = db.get_card(
         card_id=card_id

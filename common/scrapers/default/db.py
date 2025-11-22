@@ -1,13 +1,15 @@
 from pymongo import ASCENDING, MongoClient
 
+import config
+
 from log import get_logger
 
 
 class ScraperDb:
-    def __init__(self, host, database):
+    def __init__(self, host: str = config.MONGO_HOST, port: int = config.MONGO_PORT, database: str = None):
         self.logger = get_logger()
 
-        self.client = MongoClient(host)
+        self.client = MongoClient(host=host, port=port)
 
         self.db = self.client[database]
         self.db.pages.create_index([('configuration', ASCENDING), ('stage', ASCENDING), ('url', ASCENDING)], unique=True)
@@ -37,25 +39,25 @@ class ScraperDb:
 
         return statistics
 
-    def has_page(self, configuration, stage, url):
+    def has_page(self, configuration: str, stage: str, url: str):
         return self.db.pages.find_one({
             'configuration': configuration,
             'stage': stage,
             'url': url
         })
 
-    def has_version(self, cache_path):
+    def has_version(self, cache_path: str):
         return self.db.pages.find_one({
             'versions.cache.path': cache_path
         })
 
-    def index_page(self, data):
+    def index_page(self, data: dict):
         return self.db.pages.insert_one(data)
 
-    def index_stats(self, data):
+    def index_stats(self, data: dict):
         return self.db.stats.insert_one(data)
 
-    def index_version(self, query, data):
+    def index_version(self, query: str, data: dict):
         # TODO: Validate.
         query = {
             'configuration': query['configuration'],

@@ -6,7 +6,7 @@ from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 from http import HTTPStatus
 
-from config import Config
+from config import AppConfig
 from helpers import create_response
 from models import db
 
@@ -19,7 +19,7 @@ connexion_app = connexion.App(__name__, specification_dir=os.path.abspath(os.pat
 connexion_app.add_api('api_v1.yaml', validate_responses=True)
 
 app = connexion_app.app
-app.config.from_object(Config)
+app.config.from_object(AppConfig)
 
 codes = [
     HTTPStatus.BAD_REQUEST,

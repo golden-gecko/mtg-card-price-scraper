@@ -3,7 +3,7 @@ from scrapers.gatherer.db import GathererDb
 
 
 def route_get_watermarks():
-    db = GathererDb(host='mongo')
+    db = GathererDb()
 
     data = {
         'watermarks': db.get_watermarks()

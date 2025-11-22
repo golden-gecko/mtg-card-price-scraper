@@ -10,9 +10,9 @@ logger = get_logger()
 
 
 def process_search():
-    db = GathererDb(host='mongo')
+    db = GathererDb()
 
-    queue = GathererQueue(host='rabbit')
+    queue = GathererQueue()
     queue.connect()
 
     gatherer = GathererClient(db=db, queue=queue)
@@ -22,9 +22,9 @@ def process_search():
 def process_cards():
     logger.info('Thread %s starting...')
 
-    db = GathererDb(host='mongo')
+    db = GathererDb()
 
-    queue = GathererQueue(host='rabbit')
+    queue = GathererQueue()
     queue.connect()
 
     gatherer = GathererClient(db=db, queue=queue)
@@ -36,9 +36,9 @@ def process_cards():
 def process_pages():
     logger.info('Thread %s starting...')
 
-    db = GathererDb(host='mongo')
+    db = GathererDb()
 
-    queue = GathererQueue(host='rabbit')
+    queue = GathererQueue()
     queue.connect()
 
     gatherer = GathererClient(db=db, queue=queue)
@@ -70,7 +70,7 @@ def main():
     except KeyboardInterrupt as e:
         logger.warning('Processing stopped: %s', e)
     except Exception as e:
-        logger.critical('Scraper failed: %s', e)
+        logger.exception('Scraper failed: %s', e)
 
     logger.info('Service exiting...')
 

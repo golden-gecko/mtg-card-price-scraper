@@ -1,13 +1,15 @@
 import pika
 
+import config
+
 from log import get_logger
 
 
 class ScraperQueue:
-    def __init__(self, host):
+    def __init__(self, host: str = config.RABBIT_HOST, port: int = config.RABBIT_PORT):
         self.logger = get_logger()
 
-        self.connection_parameters = pika.ConnectionParameters(host)
+        self.connection_parameters = pika.ConnectionParameters(host=host, port=port)
         self.basic_properties = pika.BasicProperties(delivery_mode=2)
 
         self.connection = None
