@@ -1,0 +1,19 @@
+﻿{% extends "layouts/base.html" %}
+
+{% block title %}Parser{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-12 py-3 px-lg-3">
+            <h1>Parser</h1>
+
+            {% for page in pages %}
+                <div>
+                    {{ page.configuration }}
+                    {{ page.stage }}
+                    {{ page.url }}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

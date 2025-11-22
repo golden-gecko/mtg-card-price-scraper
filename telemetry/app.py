@@ -22,7 +22,7 @@ if __name__ == '__main__':
             data = {
                 'cpu': psutil.cpu_percent(),
                 'memory': psutil.virtual_memory()._asdict()['percent'],
-                'network_latency': tcp_latency.measure_latency('google.pl')[0],
+                # 'network_latency': tcp_latency.measure_latency('google.pl')[0],
                 'timestamp': get_timestamp()
             }
 

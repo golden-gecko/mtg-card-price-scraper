@@ -12,6 +12,9 @@ ELASTIC_PORT = int(os.environ.get('ELASTIC_PORT'))
 
 LOG_LEVEL = logging.DEBUG
 
+MINIO_HOST = os.environ.get('MINIO_HOST')
+MINIO_PORT = int(os.environ.get('MINIO_PORT'))
+
 MONGO_HOST = os.environ.get('MONGO_HOST')
 MONGO_PORT = int(os.environ.get('MONGO_PORT'))
 

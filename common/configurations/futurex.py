@@ -6,38 +6,64 @@ from utils import ExpirationTime
 
 logger = get_logger()
 
-configurations = {
-    'futurex': {
-        'init': [
+configurations = [
+    {
+        'name': 'futurex',
+        'stages': [
             {
-                'stage': 'main',
-                'url': 'https://futurex.pl/pl/c/Magic-the-Gathering-MTG-karty/27'
-            }
-        ],
-        'main': [
-            {
-                'stage': 'category',
-                'selector': '#category_27 .level_1 li a'
-            }
-        ],
-        'category': [
-            {
-                'stage': 'category',
-                'selector': '.paginator a'
+                'name': 'init',
+                'steps': [
+                    {
+                        'stage': 'main',
+                        'urls': [
+                            'https://futurex.pl/pl/c/Magic-the-Gathering-MTG-karty/27'
+                        ]
+                    }
+                ]
             },
             {
-                'stage': 'product',
-                'selector': '.product a'
-            }
-        ],
-        'product': [
+                'name': 'main',
+                'expires': ExpirationTime.month,
+                'steps': [
+                    {
+                        'stage': 'category',
+                        'selectors': [
+                            '#category_27 .level_1 li a'
+                        ]
+                    }
+                ]
+            },
             {
-                'attributes': {
-                    'name': '#box_productfull h1.name',
-                    'price': '#box_productfull .price em',
-                    'quantity': '#box_productfull dd.availability'
-                }
+                'name': 'category',
+                'expires': ExpirationTime.month,
+                'steps': [
+                    {
+                        'stage': 'category',
+                        'selectors': [
+                            '.paginator a'
+                        ]
+                    },
+                    {
+                        'stage': 'product',
+                        'selectors': [
+                            '.product a'
+                        ]
+                    }
+                ]
+            },
+            {
+                'name': 'product',
+                'expires': ExpirationTime.month,
+                'steps': [
+                    {
+                        'attributes': {
+                            'name': '#box_productfull h1.name',
+                            'price': '#box_productfull .price em',
+                            'quantity': '#box_productfull dd.availability'
+                        }
+                    }
+                ]
             }
         ]
     }
-}
+]

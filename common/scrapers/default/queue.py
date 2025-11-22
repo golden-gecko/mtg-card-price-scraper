@@ -29,9 +29,11 @@ class ScraperQueue:
         if self.connection:
             self.connection.close()
 
-    def add_callback(self, queue, callback):
+    def declare(self, queue):
         self.channel.queue_declare(queue=queue, durable=True)
         self.channel.queue_declare(queue='{}_failed'.format(queue), durable=True)
+
+    def add_callback(self, queue, callback):
         self.channel.basic_consume(queue=queue, on_message_callback=callback)
 
     def publish(self, queue, value):
