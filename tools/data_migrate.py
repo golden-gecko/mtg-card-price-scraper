@@ -5,6 +5,7 @@ import re
 import shutil
 
 from pymongo import MongoClient
+
 from scrapers.default.queue import ScraperQueue
 
 
@@ -129,6 +130,7 @@ def migrate_005():
 
 def migrate_006():
     client = MongoClient('192.168.0.162')
+
     query = {
         'attributes': {
             '$exists': True
@@ -174,4 +176,86 @@ def migrate_007():
     queue.publish('scraper_futurex', json.dumps(value))
 
 
-# migrate_007()
+def migrate_008():
+    db = MongoClient('192.168.0.162')
+
+    queue = ScraperQueue('192.168.0.162')
+    queue.connect()
+
+    query = {}
+
+    for page in db.scraper.pages.find(query):
+        task = {
+            'configuration': page['configuration'],
+            'stage': page['stage'],
+            'url': page['url']
+        }
+
+        if 'versions' not in page:
+            print('No versions in page')
+            queue.publish('scraper_{}'.format(page['configuration']), json.dumps(task))
+        elif len(page['versions']) <= 0:
+            print('Empty versions in page')
+            queue.publish('scraper_{}'.format(page['configuration']), json.dumps(task))
+
+
+def migrate_009():
+    db = MongoClient('192.168.0.162')
+
+    queue = ScraperQueue('192.168.0.162')
+    queue.connect()
+
+    query = {}
+
+    for page in db.scraper.pages.find(query):
+        task = {
+            'configuration': page['configuration'],
+            'stage': page['stage'],
+            'url': page['url']
+        }
+
+        if 'versions' in page:
+            for version in page['versions']:
+                if not os.path.exists(version['cache']['path']):
+                    print('Cache path does not exist')
+                    queue.publish('scraper_{}'.format(page['configuration']), json.dumps(task))
+
+
+def migrate_010():
+    db = MongoClient('192.168.0.162')
+
+    queue = ScraperQueue('192.168.0.162')
+    queue.connect()
+
+    query = {
+        'versions.cache.path': {
+            '$regex': r'^/data/\w+/\w+$'
+        }
+    }
+
+    for page in db.scraper.pages.find(query):
+        print(page)
+
+        page_query = {
+            '_id': page['_id']
+        }
+
+        new_versions = []
+
+        if 'versions' in page:
+            for version in page['versions']:
+                if os.path.isfile(version['cache']['path']):
+                    new_versions.append(version)
+
+        versions_query = {
+            '$set': {
+                'versions': new_versions
+            }
+        }
+
+        print(versions_query)
+
+        db.scraper.pages.update_one(page_query, versions_query)
+
+
+# migrate_008()

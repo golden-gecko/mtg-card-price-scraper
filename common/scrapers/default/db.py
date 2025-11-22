@@ -44,6 +44,11 @@ class ScraperDb:
             'url': url
         })
 
+    def has_version(self, cache_path):
+        return self.db.pages.find_one({
+            'versions.cache.path': cache_path
+        })
+
     def index_page(self, data):
         return self.db.pages.insert_one(data)
 

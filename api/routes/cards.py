@@ -9,4 +9,4 @@ def route_cards():
         'cards': [x for x in mongo.get_cards()]
     }
 
-    return create_response(code=200, data=data)
+    return create_response(data=data)

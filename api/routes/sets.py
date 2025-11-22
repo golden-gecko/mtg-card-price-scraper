@@ -9,4 +9,4 @@ def route_sets():
         'sets': [x for x in mongo.get_sets()]
     }
 
-    return create_response(code=200, data=data)
+    return create_response(data=data)

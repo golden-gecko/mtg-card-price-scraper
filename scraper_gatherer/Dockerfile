@@ -6,7 +6,7 @@ COPY common/requirements.txt .
 
 RUN pip3 install -r requirements.txt
 
-COPY api .
 COPY common .
+COPY scraper_gatherer .
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--log-level", "debug", "app:app"]
+CMD ["python3", "app.py"]
