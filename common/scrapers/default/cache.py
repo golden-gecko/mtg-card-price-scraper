@@ -11,7 +11,7 @@ from utils import get_timestamp, load_file, save_to_file
 
 class ScraperCache:
     def __init__(self, directory):
-        self.logger = get_logger(__name__)
+        self.logger = get_logger()
 
         self.directory = directory
 
@@ -34,7 +34,7 @@ class ScraperCache:
 
             self.logger.warning('Cache is %d seconds old', total_seconds)
 
-            if total_seconds > config.CACHE_EXPIRATION_TIME:
+            if total_seconds > config.SCRAPER_CACHE_EXPIRATION_TIME:
                 return None, None, None
 
             return load_file(path), path, path_time.isoformat()

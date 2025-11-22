@@ -6,7 +6,7 @@ def route_types():
     db = GathererDb(host='mongo')
 
     data = {
-        'types': [x for x in db.get_types()]
+        'types': db.get_types()
     }
 
     return create_response(data=data)

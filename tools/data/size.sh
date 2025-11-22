@@ -1,11 +1,14 @@
 #!/bin/bash -e
 
 cd $(dirname ${0})
-cd ../..
 
-IMAGE=python:3.7.4-slim-buster
+IMAGE=FROM python:3.7.4-slim-buster
 
-for directory in $(docker run -it --volume cenykart_dev:/data ${IMAGE} bash -c "ls /data")
-do
-    echo ${directory}: $(docker run -it --volume cenykart_dev:/data ${IMAGE} bash -c "du -sh /data/${directory}")
-done
+COMMAND='
+    for i in $(ls /data)
+    do
+        echo ${i}: $(du -sh /data/${i})
+    done
+'
+
+docker run -it --volume cenykart_dev:/data ${IMAGE} bash -c "${COMMAND}"

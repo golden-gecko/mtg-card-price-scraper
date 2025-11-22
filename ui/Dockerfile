@@ -1,3 +1,12 @@
-FROM nginx:1.17.3
+FROM python:3.7.4-slim-buster
 
-COPY ui /usr/share/nginx/html
+WORKDIR /usr/local/app
+
+COPY common/requirements.txt .
+
+RUN pip3 install -r requirements.txt
+
+COPY common .
+COPY ui .
+
+CMD ["gunicorn", "--bind", "0.0.0.0:80", "--log-level", "debug", "app:app"]

@@ -6,7 +6,7 @@ def route_formats():
     db = GathererDb(host='mongo')
 
     data = {
-        'formats': [x for x in db.get_formats()]
+        'formats': db.get_formats()
     }
 
     return create_response(data=data)

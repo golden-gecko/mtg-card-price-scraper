@@ -12,13 +12,14 @@ docker-compose up \
     --scale kibana=0 \
     --scale mongo=1 \
     --scale mongo_express=1 \
-    --scale postgres=0 \
+    --scale postgres=1 \
     --scale rabbit=1 \
-    --scale redis=0 \
+    --scale redis=1 \
     --scale scraper_gatherer=1 \
     --scale scraper_mtg=1 \
     --scale selenium_hub=0 \
     --scale selenium_node_chrome=0 \
+    --scale static=1 \
     --scale ui=1 \
     --scale vault=0 \
     "$@"

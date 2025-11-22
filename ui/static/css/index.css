@@ -1,0 +1,26 @@
+#search-form input,
+#search-form select {
+    width: 150px;
+}
+
+#search-results .search-item {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+#search-results .search-item .name,
+#search-results .search-item .type {
+    margin-bottom: 5px;
+}
+
+#search-results .search-item .type {
+    font-size: 0.9em;
+}
+
+#search-results .search-item .image-small {
+    height: 155px;
+}
+
+#search-results .search-item .image-normal {
+    height: 310px;
+}

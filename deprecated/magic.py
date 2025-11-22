@@ -37,7 +37,7 @@ class MagicClient:
         self.mongo = mongo
         self.rabbit = rabbit
 
-        self.logger = get_logger(__name__)
+        self.logger = get_logger()
 
     def is_card_processed(self, card_id: int) -> bool:
         status = self.mongo.has_card(card_id)

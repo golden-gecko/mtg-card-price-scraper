@@ -10,7 +10,7 @@ from datetime import datetime
 from log import get_logger
 
 
-logger = get_logger(__name__)
+logger = get_logger()
 
 
 def download_and_save_image(url: str, file_name: str):
