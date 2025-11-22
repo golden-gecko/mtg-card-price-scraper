@@ -1,0 +1,86 @@
+swagger: "2.0"
+
+basePath: "/v1"
+
+info:
+  title: "API"
+  version: "1.0.0"
+
+schemes:
+- "http"
+
+paths:
+
+  /cards:
+    get:
+      summary: "Return card list"
+      operationId: "routes.cards.route_cards"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Success"
+
+  /formats:
+    get:
+      summary: "Return format list"
+      operationId: "routes.formats.route_formats"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Success"
+
+  /sets:
+    get:
+      summary: "Return set list"
+      operationId: "routes.sets.route_sets"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Success"
+
+  /types:
+    get:
+      summary: "Return type list"
+      operationId: "routes.types.route_types"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Success"
+
+  /scraper/gatherer/cards/{id}:
+    post:
+      summary: "Queue Gatherer card for processing"
+      operationId: "routes.scraper.gatherer.route_cards"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID of Gatherer card"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        200:
+          description: "Success"
+
+  /scraper/gatherer/pages/{id}:
+    post:
+      summary: "Queue Gatherer page for processing"
+      operationId: "routes.scraper.gatherer.route_pages"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "ID of Gatherer page"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        200:
+          description: "Success"

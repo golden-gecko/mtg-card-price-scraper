@@ -1,0 +1,114 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <title>Home</title>
+
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <link href="css/dashboard.css" rel="stylesheet">
+    </head>
+
+    <body>
+        <div id="container" class="container">
+            <div class="row"></div>
+        </div>
+
+        <script src="js/jquery-3.3.1.min.js"></script>
+        <script src="js/popper.min.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script>
+            var container = $('#container .row');
+
+            function set_background(url) {
+                $('body').css({
+                    'background-image': 'url(' + url + ')'
+                });
+            }
+
+            function add_value(key, item) {
+                console.log('add_value(' + key + ', ' + item + ')');
+                console.log(item);
+
+                var categories = key.split('.');
+
+                var parent_category = container;
+                var parent_name = '';
+
+                categories.forEach(function(category_name, i) {
+                    console.log(category_name);
+
+                    if (key == 'Zdjęcie dnia') {
+                        return;
+                    }
+
+                    if (parent_name == '') {
+                        parent_name += category_name;
+                    } else {
+                        parent_name += '.' + category_name;
+                    }
+
+                    var category = $('.category[data-key="' + parent_name  + '"]');
+
+                    if (category.length == 0) {
+                        if (i == 0) {
+                            category = $('<div class="col-6 category" data-key="' + parent_name + '">');
+                        } else {
+                            category = $('<div class="category" data-key="' + parent_name + '">');
+                        }
+
+                        category.html(category_name);
+                        category.appendTo(parent_category);
+                    }
+
+                    parent_category = category;
+                });
+
+                if (key == 'Zdjęcie dnia') {
+                    set_background(item.value);
+                } else {
+                    var html;
+
+                    if (item.url) {
+                        html = ' <a href="' + item.url + '" target="_blank">źródło</a>';
+                    }
+
+                    if (typeof item.value == 'string' && item.value.startsWith('http')) {
+                        html = parent_category.html() + ': ' + '<img src="' + item.value + '">' + html;
+                    } else {
+                        html = parent_category.html() + ': ' + item.value + html;
+                    }
+
+                    parent_category.html(html);
+                }
+            }
+
+            function setup() {
+                console.log('setup()');
+
+                $.ajaxSetup({
+                    cache: false
+                });
+            }
+
+            function update() {
+                console.log('update()');
+
+                $.getJSON('http://apollo.local:7000/dashboard/values', function(json) {
+                    container.empty();
+
+                    $.each(json, function(k, v) {
+                        add_value(v['key'], v);
+                    });
+
+                    setTimeout(update, 60000);
+                });
+            }
+
+            setup();
+            update();
+        </script>
+    </body>
+</html>

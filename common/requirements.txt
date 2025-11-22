@@ -1,0 +1,11 @@
+bs4==0.0.1
+connexion[swagger-ui]==2.3.0
+flask==1.1.1
+flask-migrate==2.5.2
+flask-sqlalchemy==2.4.0
+gunicorn==19.9.0
+psycopg2-binary==2.8.3
+pika==1.1.0
+redis==3.3.8
+requests==2.21.0
+pymongo==3.9.0
