@@ -17,8 +17,6 @@ DATABASE_USER = 'cenykart'
 
 class Config:
     JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(days=1)
-    # JWT_BLACKLIST_ENABLED = True
-    # JWT_BLACKLIST_TOKEN_CHECKS = ['access', 'refresh']
     JWT_SECRET_KEY = '3e23e8160039594a3389'
 
     SECRET_KEY = '3e23e8160039594a3389'

@@ -20,7 +20,7 @@ def route_register():
     logger.debug('current_user: %s', current_user)
 
     if current_user.is_authenticated:
-        return redirect('/')
+        return redirect('/profile')
 
     variables = {
         'active_page': 'account'

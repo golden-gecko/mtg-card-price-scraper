@@ -1,17 +1,17 @@
 import jwt
 
-from flask import Flask, request
+from flask import Flask, render_template, request
 from flask_login import LoginManager, UserMixin
 from http import HTTPStatus
 
 import config
 
-from helpers import create_response, make_url, send_get
+from helpers import make_url, send_get
 from log import get_logger
 
 
 def route_error(error):
-    return create_response(code=error.code, message=str(error.description))
+    return render_template('errors/{}.html'.format(error.code)), error.code
 
 
 logger = get_logger()
@@ -21,11 +21,7 @@ app.config.from_object(config.Config)
 
 codes = [
     HTTPStatus.BAD_REQUEST,
-    HTTPStatus.UNAUTHORIZED,
-    HTTPStatus.FORBIDDEN,
     HTTPStatus.NOT_FOUND,
-    HTTPStatus.METHOD_NOT_ALLOWED,
-    HTTPStatus.UNPROCESSABLE_ENTITY,
     HTTPStatus.INTERNAL_SERVER_ERROR,
     HTTPStatus.SERVICE_UNAVAILABLE
 ]
@@ -115,4 +111,4 @@ def load_user(id):
     return User(id=id, token=token, data=response.json()['data'])
 
 
-from routes import auth, index, profile, register, search
+from routes import auth, card, index, profile, register, search
