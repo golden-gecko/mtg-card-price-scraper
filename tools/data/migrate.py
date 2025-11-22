@@ -258,4 +258,4 @@ def migrate_010():
         db.scraper.pages.update_one(page_query, versions_query)
 
 
-# migrate_008()
+# migrate_011()

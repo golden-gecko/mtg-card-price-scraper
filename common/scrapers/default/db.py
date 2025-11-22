@@ -5,12 +5,12 @@ from log import get_logger
 
 class ScraperDb:
     def __init__(self, host, database):
+        self.logger = get_logger(__name__)
+
         self.client = MongoClient(host)
 
         self.db = self.client[database]
         self.db.pages.create_index([('configuration', ASCENDING), ('stage', ASCENDING), ('url', ASCENDING)], unique=True)
-
-        self.logger = get_logger(__name__)
 
     def get_statistics(self):
         cursor = self.db.pages.aggregate([
@@ -51,6 +51,9 @@ class ScraperDb:
 
     def index_page(self, data):
         return self.db.pages.insert_one(data)
+
+    def index_stats(self, data):
+        return self.db.stats.insert_one(data)
 
     def index_version(self, query, data):
         # TODO: Validate.
