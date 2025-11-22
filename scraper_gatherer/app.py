@@ -1,25 +1,79 @@
-from scrapers.gatherer import GathererClient
+import threading
+
 from log import get_logger
-from mongo import MongoGatherer, MongoMagic
-from rabbit import RabbitClient
-from scrapers.magic import MagicClient
+from scrapers.gatherer.client import GathererClient
+from scrapers.gatherer.db import GathererDb
+from scrapers.gatherer.queue import GathererQueue
+
+
+logger = get_logger(__name__)
+
+
+def process_search():
+    db = GathererDb(host='mongo')
+
+    queue = GathererQueue(host='rabbit')
+    queue.connect()
+
+    gatherer = GathererClient(db=db, queue=queue)
+    gatherer.process_search()
+
+
+def process_cards():
+    logger.info('Thread %s starting...')
+
+    db = GathererDb(host='mongo')
+
+    queue = GathererQueue(host='rabbit')
+    queue.connect()
+
+    gatherer = GathererClient(db=db, queue=queue)
+    gatherer.process_cards()
+
+    logger.info('Thread %s exiting...')
+
+
+def process_pages():
+    logger.info('Thread %s starting...')
+
+    db = GathererDb(host='mongo')
+
+    queue = GathererQueue(host='rabbit')
+    queue.connect()
+
+    gatherer = GathererClient(db=db, queue=queue)
+    gatherer.process_pages()
+
+    logger.info('Thread %s exiting...')
+
+
+def main():
+    logger.info('Service starting...')
+
+    try:
+        process_search()
+
+        threads = []
+
+        x = threading.Thread(target=process_cards)
+        x.start()
+
+        threads.append(x)
+
+        x = threading.Thread(target=process_pages)
+        x.start()
+
+        threads.append(x)
+
+        for thread in threads:
+            thread.join()
+    except KeyboardInterrupt as e:
+        logger.warning('Processing stopped: %s', e)
+    except Exception as e:
+        logger.critical('Scraper failed: %s', e)
+
+    logger.info('Service exiting...')
 
 
 if __name__ == '__main__':
-    logger = get_logger(__name__)
-    logger.info('Service starting...')
-
-    mongo = MongoGatherer(host='mongo')
-    rabbit = RabbitClient(host='rabbit')
-
-    gatherer = GathererClient(mongo=mongo, rabbit=rabbit)
-    gatherer.process_search()
-    gatherer.process()
-
-    # mongo = MongoMagic(host='mongo')
-    # rabbit = RabbitClient(host='rabbit')
-
-    # magic = MagicClient(mongo=mongo, rabbit=rabbit)
-    # magic.process()
-
-    logger.info('Service exiting...')
+    main()

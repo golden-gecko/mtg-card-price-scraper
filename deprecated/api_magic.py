@@ -1,3 +1,5 @@
+import http
+
 from helpers import create_response
 from mongo import MongoMagic
 from rabbit import RabbitClient
@@ -13,9 +15,9 @@ def route_cards(card_id):
     magic = MagicClient(mongo=mongo, rabbit=rabbit)
 
     if magic.queue_card(card_id=card_id):
-        code = 200
+        code = http.HTTPStatus.OK
     else:
-        code = 500
+        code = http.HTTPStatus.INTERNAL_SERVER_ERROR
 
     return create_response(code=code)
 
@@ -29,8 +31,8 @@ def route_pages(page_id):
     magic = MagicClient(mongo=mongo, rabbit=rabbit)
 
     if magic.queue_page(page_id=page_id):
-        code = 200
+        code = http.HTTPStatus.OK
     else:
-        code = 500
+        code = http.HTTPStatus.INTERNAL_SERVER_ERROR
 
     return create_response(code=code)

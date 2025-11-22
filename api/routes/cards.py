@@ -1,12 +1,12 @@
 from helpers import create_response
-from mongo import MongoMagic
+from scrapers.gatherer.db import GathererDb
 
 
 def route_cards():
-    mongo = MongoMagic(host='mongo')
+    db = GathererDb(host='mongo')
 
     data = {
-        'cards': [x for x in mongo.get_cards()]
+        'cards': [x for x in db.get_cards()]
     }
 
     return create_response(data=data)

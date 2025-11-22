@@ -9,7 +9,7 @@ from urllib.parse import urlsplit, urlunsplit
 from log import get_logger
 from scrapers.default.cache import ScraperCache
 from scrapers.default.db import ScraperDb
-from scrapers.default.exception import ScraperDuplicateException, ScraperProcessingException, ScraperSkipException
+from scrapers.default.exceptions import ScraperDuplicateException, ScraperProcessingException, ScraperSkipException
 from scrapers.default.queue import ScraperQueue
 from utils import ExecutionTime, download, get_timestamp
 
@@ -66,7 +66,7 @@ class ScraperClient:
 
                 self.queue.start_consuming()
             except KeyboardInterrupt as e:
-                self.logger.warning('Processing interrupted: %s', e)
+                self.logger.warning('Processing stopped: %s', e)
                 self.queue.disconnect()
 
                 break
@@ -197,7 +197,7 @@ class ScraperClient:
 
                 with ExecutionTime('Downloading page'):
                     url_html, cache_path, cache_timestamp, url_download_time = self.download_url(configuration_name, task['url'])
-                    url_soup = BeautifulSoup(url_html, 'html.parser')
+                    url_soup = BeautifulSoup(url_html, 'lxml')
 
                     stats = {
                         'configuration': configuration_name,

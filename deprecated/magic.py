@@ -88,7 +88,7 @@ class MagicClient:
 
                 channel.start_consuming()
             except KeyboardInterrupt as e:
-                self.logger.warning('Processing interrupted: %s', e)
+                self.logger.warning('Processing stopped: %s', e)
                 break
             except Exception as e:
                 self.logger.error('Processing failed: %s', e)
