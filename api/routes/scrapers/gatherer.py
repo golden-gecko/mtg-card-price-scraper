@@ -1,7 +1,7 @@
 from helpers import create_response
-from gatherer import GathererClient
 from mongo import MongoGatherer
 from rabbit import RabbitClient
+from scrapers.gatherer import GathererClient
 
 
 def route_cards(card_id):

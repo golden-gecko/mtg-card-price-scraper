@@ -1,8 +1,8 @@
-from gatherer import GathererClient
+from scrapers.gatherer import GathererClient
 from log import get_logger
-from magic import MagicClient
 from mongo import MongoGatherer, MongoMagic
 from rabbit import RabbitClient
+from scrapers.magic import MagicClient
 
 
 if __name__ == '__main__':

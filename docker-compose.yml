@@ -19,13 +19,14 @@ services:
       context: .
       dockerfile: dev/Dockerfile
     depends_on:
+      - mongo
       - rabbit
     restart: always
     volumes:
       - dev:/data
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.3.1
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.8.2
     environment:
       - discovery.type=single-node
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
@@ -36,7 +37,7 @@ services:
   kibana:
     depends_on:
       - elasticsearch
-    image: docker.elastic.co/kibana/kibana:7.3.1
+    image: docker.elastic.co/kibana/kibana:6.8.2
     ports:
       - 5601:5601
     restart: always
@@ -45,6 +46,8 @@ services:
 
   mongo:
     image: mongo:4.2.0
+    ports:
+      - 27017:27017
     restart: always
     volumes:
       - mongo_configdb:/data/configdb
@@ -72,6 +75,7 @@ services:
     build:
       context: rabbit
     ports:
+      - 5672:5672
       - 15672:15672
     restart: always
     volumes:

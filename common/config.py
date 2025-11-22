@@ -1,3 +1,5 @@
+CACHE_EXPIRATION_TIME = 60 * 60 * 24 * 30
+
 DATABASE_DRIVER = 'postgresql+psycopg2'
 DATABASE_HOST = 'postgres'
 DATABASE_NAME = 'dev'

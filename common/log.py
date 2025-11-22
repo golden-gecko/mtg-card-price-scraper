@@ -1,4 +1,3 @@
-import inspect
 import logging.handlers
 import sys
 
@@ -10,7 +9,6 @@ def get_logger(name=None):
     global loggers
 
     if name not in loggers:
-        # formatter = logging.Formatter('[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s')
         formatter = logging.Formatter('[%(asctime)s] [%(filename)s] [%(lineno)d] [%(levelname)s] %(message)s')
 
         stdout_handler = logging.StreamHandler(sys.stdout)
@@ -23,10 +21,15 @@ def get_logger(name=None):
     return loggers[name]
 
 
-def log_call(instance=None):
-    logger = get_logger(__name__)
+def log_call(function):
+    def wrapper(*args, **kwargs):
+        if len(args):
+            message = '{}({})'.format(function.__name__, ' ,'.join([str(arg) for arg in args]))
+        else:
+            message = '{}()'.format(function.__name__)
 
-    if instance is None:
-        logger.debug('%s()', inspect.stack()[1][3])
-    else:
-        logger.debug('%s.%s()', type(instance).__name__, inspect.stack()[1][3])
+        get_logger().debug(message)
+
+        return function(*args, **kwargs)
+
+    return wrapper
