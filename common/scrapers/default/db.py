@@ -1,4 +1,5 @@
 from pymongo import ASCENDING, MongoClient
+from pymongo.results import InsertOneResult
 
 import config
 
@@ -13,6 +14,7 @@ class ScraperDb:
 
         self.db = self.client[database]
         self.db.pages.create_index([('configuration', ASCENDING), ('stage', ASCENDING), ('url', ASCENDING)], unique=True)
+        self.db.pages_2.create_index([('cache_path', ASCENDING)], unique=True)
 
     def get_statistics(self):
         cursor = self.db.pages.aggregate([
@@ -51,24 +53,8 @@ class ScraperDb:
             'versions.cache.path': cache_path
         })
 
-    def index_page(self, data: dict):
-        return self.db.pages.insert_one(data)
+    def index_page(self, data: dict) -> InsertOneResult:
+        return self.db.pages_2.insert_one(data)
 
-    def index_stats(self, data: dict):
+    def index_stats(self, data: dict) -> InsertOneResult:
         return self.db.stats.insert_one(data)
-
-    def index_version(self, query: str, data: dict):
-        # TODO: Validate.
-        query = {
-            'configuration': query['configuration'],
-            'stage': query['stage'],
-            'url': query['url']
-        }
-
-        data = {
-            '$push': {
-                'versions': data
-            }
-        }
-
-        return self.db.pages.update_one(query, data)

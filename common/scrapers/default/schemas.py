@@ -29,10 +29,10 @@ message_parser = {
         'configuration': {
             'type': 'string'
         },
-        'parent_url': {
+        'stage': {
             'type': 'string'
         },
-        'stage': {
+        'url': {
             'type': 'string'
         }
     },
@@ -42,5 +42,22 @@ message_parser = {
 }
 
 message_indexer = {
-
+    'type': 'object',
+    'properties': {
+        'attributes': {
+            'type': 'object'
+        },
+        'configuration': {
+            'type': 'string'
+        },
+        'stage': {
+            'type': 'string'
+        },
+        'url': {
+            'type': 'string'
+        }
+    },
+    'required': [
+        'attributes', 'configuration', 'stage'
+    ]
 }
