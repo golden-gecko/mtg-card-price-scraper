@@ -6,7 +6,6 @@ docker-compose up \
     --build \
     --detach \
     --remove-orphans \
-    --scale grafana=0 \
     --scale minio=0 \
     --scale scraper_gatherer=0 \
     --scale selenium_hub=0 \
