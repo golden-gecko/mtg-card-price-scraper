@@ -1,327 +1,386 @@
-swagger: "2.0"
-
-basePath: "/v1"
-
+openapi: 3.0.1
 info:
-  title: "API"
-  version: "1.0.0"
-
-schemes:
-- "http"
-
+  title: API
+  version: 1.0.0
+servers:
+- url: /v1
 tags:
-  - name: "Auth"
-  - name: "Maintenance"
-  - name: "MTG"
-  - name: "Scraper"
-  - name: "User"
-
+- name: Auth
+- name: Maintenance
+- name: MTG
+- name: Scraper
+- name: User
 paths:
   /healthcheck:
     get:
       tags:
-        - "Maintenance"
-      summary: "Returns service status"
-      operationId: "routes.healthcheck.route_healthcheck"
-      produces:
-        - "application/json"
+      - Maintenance
+      summary: Returns service status
+      operationId: routes.healthcheck.route_healthcheck
       responses:
         200:
-          description: "Success"
-
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
   /auth:
-    delete:
-      tags:
-        - "Auth"
-      summary: "Logs out user"
-      operationId: "routes.auth.route_logout"
-      produces:
-        - "application/json"
-      responses:
-        200:
-          description: "Success"
     post:
       tags:
-        - "Auth"
-      summary: "Logs in user"
-      operationId: "routes.auth.route_login"
-      produces:
-        - "application/json"
-      parameters:
-        - name: "page"
-          in: "body"
-          schema:
-            type: "object"
-            properties:
-              email:
-                type: "string"
-                example: "john@doe.com"
-              password_hash:
-                type: "string"
-                example: "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb"
+      - Auth
+      summary: Logs in user and returns access and refresh token
+      operationId: routes.auth.route_login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: john@doe.com
+                password_hash:
+                  type: string
+                  example: ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb
       responses:
         200:
-          description: "Success"
-
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+    delete:
+      tags:
+      - Auth
+      summary: Logs out user
+      operationId: routes.auth.route_logout
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /refresh:
+    post:
+      tags:
+      - Auth
+      summary: Returns refresh token
+      operationId: routes.auth.route_refresh
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
   /users:
     post:
       tags:
-        - "User"
-      summary: "Registers new user"
-      operationId: "routes.users.route_users"
-      produces:
-        - "application/json"
-      parameters:
-        - name: "page"
-          in: "body"
-          schema:
-            type: "object"
-            properties:
-              email:
-                type: "string"
-                example: "john@doe.com"
-              password_hash:
-                type: "string"
-                example: "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb"
+      - User
+      summary: Registers new user
+      operationId: routes.users.route_users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: john@doe.com
+                password_hash:
+                  type: string
+                  example: ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb
+        required: false
       responses:
         200:
-          description: "Success"
-
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+      x-codegen-request-body-name: page
   /blocks:
     get:
       tags:
-        - "MTG"
-      summary: "Return block list"
-      operationId: "routes.blocks.route_blocks"
-      produces:
-        - "application/json"
+      - MTG
+      summary: Return block list
+      operationId: routes.blocks.route_blocks
       responses:
         200:
-          description: "Success"
-
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
   /cards:
     get:
       tags:
-        - "MTG"
-      summary: "Return card list"
-      operationId: "routes.cards.route_cards"
-      produces:
-        - "application/json"
+      - MTG
+      summary: Return card list
+      operationId: routes.cards.route_cards
       parameters:
-        - name: "block"
-          in: "query"
-          description: "Block name"
-          type: "string"
-        - name: "color"
-          in: "query"
-          description: "Card color"
-          type: "string"
-        - name: "expansion"
-          in: "query"
-          description: "Expansion name"
-          type: "string"
-        - name: "format"
-          in: "query"
-          description: "Format name"
-          type: "string"
-        - name: "name"
-          in: "query"
-          description: "Card name"
-          type: "string"
-        - name: "rarity"
-          in: "query"
-          description: "Card rarity"
-          type: "string"
-        - name: "subtype"
-          in: "query"
-          description: "Card subtype"
-          type: "string"
-        - name: "type"
-          in: "query"
-          description: "Card type"
-          type: "string"
+      - name: block
+        in: query
+        description: Block name
+        schema:
+          type: string
+      - name: color
+        in: query
+        description: Card color
+        schema:
+          type: string
+      - name: expansion
+        in: query
+        description: Expansion name
+        schema:
+          type: string
+      - name: format
+        in: query
+        description: Format name
+        schema:
+          type: string
+      - name: name
+        in: query
+        description: Card name
+        schema:
+          type: string
+      - name: rarity
+        in: query
+        description: Card rarity
+        schema:
+          type: string
+      - name: subtype
+        in: query
+        description: Card subtype
+        schema:
+          type: string
+      - name: type
+        in: query
+        description: Card type
+        schema:
+          type: string
       responses:
         200:
-          description: "Success"
-
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
   /colors:
     get:
       tags:
-        - "MTG"
-      summary: "Return color list"
-      operationId: "routes.colors.route_colors"
-      produces:
-        - "application/json"
+      - MTG
+      summary: Return color list
+      operationId: routes.colors.route_colors
       responses:
         200:
-          description: "Success"
-
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
   /expansions:
     get:
       tags:
-        - "MTG"
-      summary: "Return expansion list"
-      operationId: "routes.expansions.route_expansions"
-      produces:
-        - "application/json"
+      - MTG
+      summary: Return expansion list
+      operationId: routes.expansions.route_expansions
       responses:
         200:
-          description: "Success"
-
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
   /formats:
     get:
       tags:
-        - "MTG"
-      summary: "Return format list"
-      operationId: "routes.formats.route_formats"
-      produces:
-        - "application/json"
+      - MTG
+      summary: Return format list
+      operationId: routes.formats.route_formats
       responses:
         200:
-          description: "Success"
-
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
   /rarities:
     get:
       tags:
-        - "MTG"
-      summary: "Return rarity list"
-      operationId: "routes.rarities.route_rarities"
-      produces:
-        - "application/json"
+      - MTG
+      summary: Return rarity list
+      operationId: routes.rarities.route_rarities
       responses:
         200:
-          description: "Success"
-
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
   /subtypes:
     get:
       tags:
-        - "MTG"
-      summary: "Return subtype list"
-      operationId: "routes.subtypes.route_subtypes"
-      produces:
-        - "application/json"
+      - MTG
+      summary: Return subtype list
+      operationId: routes.subtypes.route_subtypes
       responses:
         200:
-          description: "Success"
-
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
   /types:
     get:
       tags:
-        - "MTG"
-      summary: "Return type list"
-      operationId: "routes.types.route_types"
-      produces:
-        - "application/json"
+      - MTG
+      summary: Return type list
+      operationId: routes.types.route_types
       responses:
         200:
-          description: "Success"
-
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
   /scrapers/default/pages:
-    post:
-      tags:
-        - "Scraper"
-      summary: "Queue page for indexing"
-      operationId: "routes.scrapers.default.route_pages_post"
-      produces:
-        - "application/json"
-      parameters:
-        - name: "page"
-          in: "body"
-          schema:
-            type: "object"
-            properties:
-              configuration:
-                type: "string"
-                example: "shop"
-              stage:
-                type: "string"
-                example: "main"
-              url:
-                type: "string"
-                example: "https://shop/products"
-      responses:
-        200:
-          description: "Success"
     put:
       tags:
-        - "Scraper"
-      summary: "Queue page for refreshing"
-      operationId: "routes.scrapers.default.route_pages_put"
-      produces:
-        - "application/json"
-      parameters:
-        - name: "page"
-          in: "body"
-          schema:
-            type: "object"
-            properties:
-              configuration:
-                type: "string"
-                example: "shop"
-              stage:
-                type: "string"
-                example: "main"
-              url:
-                type: "string"
-                example: "https://shop/products"
+      - Scraper
+      summary: Queue page for refreshing
+      operationId: routes.scrapers.default.route_pages_put
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: object
+              properties:
+                configuration:
+                  type: string
+                  example: shop
+                stage:
+                  type: string
+                  example: main
+                url:
+                  type: string
+                  example: https://shop/products
+        required: false
       responses:
         200:
-          description: "Success"
-
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+      x-codegen-request-body-name: page
+    post:
+      tags:
+      - Scraper
+      summary: Queue page for indexing
+      operationId: routes.scrapers.default.route_pages_post
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: object
+              properties:
+                configuration:
+                  type: string
+                  example: shop
+                stage:
+                  type: string
+                  example: main
+                url:
+                  type: string
+                  example: https://shop/products
+        required: false
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
   /scrapers/default/statistics:
     get:
       tags:
-        - "Scraper"
-      summary: "Return statistics"
-      operationId: "routes.scrapers.default.route_statistics"
-      produces:
-        - "application/json"
+      - Scraper
+      summary: Return statistics
+      operationId: routes.scrapers.default.route_statistics
       responses:
         200:
-          description: "Success"
-
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
   /scrapers/gatherer/cards/{card_id}:
     post:
       tags:
-        - "Scraper"
-      summary: "Queue Gatherer card for processing"
-      operationId: "routes.scrapers.gatherer.route_cards"
-      produces:
-        - "application/json"
+      - Scraper
+      summary: Queue Gatherer card for processing
+      operationId: routes.scrapers.gatherer.route_cards
       parameters:
-        - name: "card_id"
-          in: "path"
-          description: "ID of Gatherer card"
-          required: true
-          type: "integer"
-          format: "int64"
-        - name: "refresh"
-          in: "query"
-          description: "Refresh Gatherer card"
-          type: "boolean"
+      - name: card_id
+        in: path
+        description: ID of Gatherer card
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: refresh
+        in: query
+        description: Refresh Gatherer card
+        schema:
+          type: boolean
       responses:
         200:
-          description: "Success"
-
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
   /scrapers/gatherer/pages/{page_id}:
     post:
       tags:
-        - "Scraper"
-      summary: "Queue Gatherer page for processing"
-      operationId: "routes.scrapers.gatherer.route_pages"
-      produces:
-        - "application/json"
+      - Scraper
+      summary: Queue Gatherer page for processing
+      operationId: routes.scrapers.gatherer.route_pages
       parameters:
-        - name: "page_id"
-          in: "path"
-          description: "ID of Gatherer page"
-          required: true
-          type: "integer"
-          format: "int64"
-        - name: "refresh"
-          in: "query"
-          description: "Refresh Gatherer page"
-          type: "boolean"
+      - name: page_id
+        in: path
+        description: ID of Gatherer page
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: refresh
+        in: query
+        description: Refresh Gatherer page
+        schema:
+          type: boolean
       responses:
         200:
-          description: "Success"
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+components:
+  schemas:
+    Response:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: integer
+          example: 200
+        data:
+          type: object
+        message:
+          type: string
+          example: Success
