@@ -7,6 +7,9 @@ API_HOST = os.environ.get('API_HOST')
 API_PORT = int(os.environ.get('API_PORT'))
 API_URL = 'http://{host}:{port}/v1/'.format(host=API_HOST, port=API_PORT)
 
+ELASTIC_HOST = os.environ.get('ELASTIC_HOST')
+ELASTIC_PORT = int(os.environ.get('ELASTIC_PORT'))
+
 LOG_LEVEL = logging.DEBUG
 
 MONGO_HOST = os.environ.get('MONGO_HOST')
