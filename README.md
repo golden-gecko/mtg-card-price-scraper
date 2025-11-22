@@ -1,4 +1,4 @@
-# cenykart
+# MTG Card Price Scraper
 
 ## How to run?
 
