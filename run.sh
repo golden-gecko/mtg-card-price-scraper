@@ -10,6 +10,7 @@ docker-compose up \
     --scale kibana=0 \
     --scale postgres=0 \
     --scale redis=0 \
+    --scale scraper=1 \
     --scale selenium_hub=0 \
     --scale selenium_node_chrome=0 \
     --scale ui=0 \

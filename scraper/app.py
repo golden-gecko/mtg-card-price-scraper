@@ -12,5 +12,5 @@ if __name__ == '__main__':
     rabbit = RabbitClient(host='rabbit')
 
     gatherer = GathererClient(mongo=mongo, rabbit=rabbit)
-    gatherer.process_search()
+    # gatherer.process_search()
     gatherer.process()

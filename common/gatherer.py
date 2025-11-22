@@ -1,4 +1,5 @@
 import os
+import pymongo.errors
 import re
 import time
 
@@ -38,7 +39,7 @@ class GathererClient:
                 self.rabbit.connect()
 
                 channel = self.rabbit.create_channel()
-                channel.basic_qos(prefetch_count=1)
+                channel.basic_qos(prefetch_count=10)
 
                 channel.queue_declare(queue='cards', durable=True)
                 channel.queue_declare(queue='cards_failed', durable=True)
@@ -51,12 +52,14 @@ class GathererClient:
                 try:
                     channel.start_consuming()
                 except KeyboardInterrupt as e:
-                    self.logger.error(e)
+                    self.logger.warning('Processing Gatherer stopped: %s', e)
                     channel.stop_consuming()
                     self.rabbit.disconnect()
                     break
             except Exception as e:
                 self.logger.error('Processing Gatherer failed: %s', e)
+                channel.stop_consuming()
+                self.rabbit.disconnect()
                 time.sleep(1)
 
     def _validate_id(self, value):
@@ -88,11 +91,11 @@ class GathererClient:
         return text
 
     def process_card(self, channel, method_frame, header_frame, body):
-        self.logger.info('Received card message...')
+        self.logger.info('Received card message: %s', body)
 
         card_id = self._validate_id(body)
 
-        if not card_id:
+        if card_id is None:
             self.logger.error('Failed to process card %d', card_id)
             self.queue_card(card_id=card_id, queue_name='cards_failed')
             channel.basic_ack(delivery_tag=method_frame.delivery_tag)
@@ -254,18 +257,21 @@ class GathererClient:
         self.logger.debug(data)
 
         # index card
-        self.mongo.index_card(data)
+        try:
+            self.mongo.index_card(data)
+        except pymongo.errors.DuplicateKeyError as e:
+            self.logger.warning('Failed to index card: %s', e)
+
         channel.basic_ack(delivery_tag=method_frame.delivery_tag)
-        return
 
     def process_page(self, channel, method_frame, header_frame, body):
-        self.logger.info('Received page message...')
+        self.logger.info('Received page message: %s', body)
 
         page_id = self._validate_id(body)
 
-        if not page_id:
-            self.logger.error('Failed to process card %d', page_id)
-            self.queue_card(card_id=page_id, queue_name='pages_failed')
+        if page_id is None:
+            self.logger.error('Failed to process page %d', page_id)
+            self.queue_page(page_id=page_id, queue_name='pages_failed')
             channel.basic_ack(delivery_tag=method_frame.delivery_tag)
             return
 
@@ -287,7 +293,7 @@ class GathererClient:
         text = self._get_page_text(page_id)
 
         if not text:
-            self.queue_card(card_id=page_id, queue_name='pages_failed')
+            self.queue_page(page_id=page_id, queue_name='pages_failed')
             channel.basic_ack(delivery_tag=method_frame.delivery_tag)
             return
 
@@ -302,8 +308,7 @@ class GathererClient:
             match = re.match(r'/Pages/Search/Default.aspx\?page=(?P<page_id>\d+)&name=\+\[\]', page['href'])
 
             if match:
-                pass
-                # self.queue_page(int(match.group('page_id')))
+                self.queue_page(page_id=int(match.group('page_id')))
 
         # process page - get cards
         cards = soup.select('.cardItem a')
@@ -313,13 +318,15 @@ class GathererClient:
             match = re.match(r'\.\./Card/Details\.aspx\?multiverseid=(?P<card_id>\d+)', card['href'])
 
             if match:
-                pass
-                # self.queue_card(int(match.group('card_id')))
+                self.queue_card(card_id=int(match.group('card_id')))
 
         # index page
-        self.mongo.index_page(data)
+        try:
+            self.mongo.index_page(data)
+        except pymongo.errors.DuplicateKeyError as e:
+            self.logger.warning('Failed to index page: %s', e)
+
         channel.basic_ack(delivery_tag=method_frame.delivery_tag)
-        return
 
     def process_search(self):
         self.logger.info('Processing search form')
@@ -526,8 +533,7 @@ class GathererClient:
 
             if match:
                 other_sets.append(int(match.group('number')))
-                pass
-                # self.queue_card(int(match.group('number')))
+                self.queue_card(card_id=int(match.group('number')))
 
         if other_sets:
             data['other_sets'] = other_sets
