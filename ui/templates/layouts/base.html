@@ -1,3 +1,50 @@
+{% macro card_image(card) -%}
+    <img src="http://192.168.0.162:8080/cards/images/{{ card.card_id }}.png"  alt="{{ card.oracle.name }}" title="{{ card.oracle.name }}">
+{%- endmacro %}
+
+{% macro card_url(card, content) -%}
+    <a href="/card/{{ card.card_id }}" title="{{ card.oracle.name }}">{{ content }}</a>
+{%- endmacro %}
+
+{% macro search_option(name, class, items) -%}
+    <div class="form-group row">
+        <label for="search-{{ class }}" class="col col-form-label">{{ name }}</label>
+        <div class="col">
+            <select id="search-{{ class }}" class="form-control" name="{{ class }}">
+                <option value=""></option>
+
+                {% if items %}
+                    {% for item in items %}
+                        <option value="{{ item.name }}">{{ item.name }}</option>
+                    {% endfor %}
+                {% endif %}
+            </select>
+        </div>
+    </div>
+{%- endmacro %}
+
+{% macro symbol_image(symbol_name) -%}
+    {% if symbol_name == 'Black' %}
+        {% set symbol = 'B' %}
+    {% elif symbol_name == 'Blue' %}
+        {% set symbol = 'U' %}
+    {% elif symbol_name == 'Green' %}
+        {% set symbol = 'G' %}
+    {% elif symbol_name == 'Red' %}
+        {% set symbol = 'R' %}
+    {% elif symbol_name == 'White' %}
+        {% set symbol = 'W' %}
+    {% elif symbol_name == 'Colorless' %}
+        {% set symbol = 'C' %}
+    {% elif symbol_name == 'Tap' %}
+        {% set symbol = 'tap' %}
+    {% else %}
+        {% set symbol = symbol_name %}
+    {% endif %}
+
+    <img src="http://192.168.0.162:8080/symbols/{{ symbol }}.png" alt="{{ symbol_name }}"  title="{{ symbol_name }}">
+{%- endmacro %}
+
 <!DOCTYPE html>
 <html lang="pl">
     <head>
@@ -6,15 +53,16 @@
         <title>{% block title %}{% endblock %} - cenykart.pl</title>
 
         {% include 'components/css.html' %}
-
+        {% include 'components/js.html' %}
     </head>
 
     <body>
         {% include 'components/navigation.html' %}
-        {% include 'components/alert.html' %}
 
-        {% block content %}{% endblock %}
+        <div class="container">
+            {% include 'components/alert.html' %}
 
-        {% include 'components/js.html' %}
+            {% block content %}{% endblock %}
+        </div>
     </body>
 </html>

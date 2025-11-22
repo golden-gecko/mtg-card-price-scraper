@@ -608,7 +608,7 @@ class GathererClient:
             'RG', 'RW',
             'UB', 'UR',
             'WB', 'WU',
-            'X'
+            'C', 'tap', 'X'
         }
 
         for symbol in symbols:
