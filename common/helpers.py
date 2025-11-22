@@ -2,6 +2,7 @@ import requests
 
 from http import HTTPStatus
 from requests import Response
+from urllib.parse import urljoin
 
 from flask import jsonify
 from log import get_logger
@@ -19,6 +20,26 @@ def create_response(code: int = HTTPStatus.OK, message: str = '', data=None) -> 
         response['data'] = data
 
     return jsonify(response), code
+
+
+def make_url(host: str, params: [list, str, None] = None) -> str:
+    if params:
+        if not isinstance(params, list):
+            params = [params]
+
+    return urljoin(host, '/'.join(params))
+
+
+def send_delete(url: str, headers=None, params=None) -> Response:
+    logger = get_logger()
+
+    logger.debug('Sending DELETE to %s...', url)
+
+    response = requests.delete(url=url, headers=headers, params=params)
+
+    logger.debug('Received %d %s', response.status_code, response.text)
+
+    return response
 
 
 def send_get(url: str, headers=None, params=None) -> Response:

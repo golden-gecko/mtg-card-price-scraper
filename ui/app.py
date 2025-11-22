@@ -3,11 +3,10 @@ import jwt
 from flask import Flask, request
 from flask_login import LoginManager, UserMixin
 from http import HTTPStatus
-from urllib.parse import urljoin
 
 import config
 
-from helpers import create_response, send_get
+from helpers import create_response, make_url, send_get
 from log import get_logger
 
 
@@ -108,7 +107,7 @@ def load_user(id):
         'Authorization': 'Bearer {}'.format(token)
     }
 
-    response = send_get(urljoin(config.API_URL, '/'.join(['users', id])), headers=headers)
+    response = send_get(make_url(config.API_URL, ['users', id]), headers=headers)
 
     if response.status_code != HTTPStatus.OK:
         return None

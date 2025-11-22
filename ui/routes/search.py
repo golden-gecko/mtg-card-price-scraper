@@ -1,15 +1,14 @@
 from flask import render_template, request
 from http import HTTPStatus
-from urllib.parse import urljoin
 
 import config
 
 from app import app
-from helpers import send_get
+from helpers import make_url, send_get
 
 
 def get_items(name, params=None):
-    response = send_get(urljoin(config.API_URL, '/'.join(['mtg', name])), params=params)
+    response = send_get(make_url(config.API_URL, ['mtg', name]), params=params)
 
     if response.status_code != HTTPStatus.OK:
         return None
