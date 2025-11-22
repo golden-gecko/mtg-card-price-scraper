@@ -10,21 +10,22 @@ from log import get_logger
 from scrapers.default import schemas
 from scrapers.default.cache import ScraperCache
 from scrapers.default.db import ScraperDb
-from scrapers.default.exceptions import ScraperDuplicateException, ScraperProcessingException, ScraperSkipException
+from scrapers.default.exceptions import ScraperProcessingException
 from scrapers.default.queue import ScraperQueue
-from utils import download, ExecutionTime, get_default_expiration_time, get_queue_name, get_timestamp, load_file, wait
+from utils import download, ExecutionTime, get_default_expiration_time, get_queue_name, load_file, wait
 
 
 class ScraperConfiguration:
     def __init__(self, configuration: dict):
-        self.logger = get_logger()
-
         self.configuration = configuration
 
     def get_expire_time(self, stage_name: str) -> int:
         stage = self.get_stage(stage_name)
 
         return stage['expires'] if 'expires' in stage else get_default_expiration_time()
+
+    def get_name(self) -> str:
+        return self.configuration['name']
 
     def get_stage(self, stage_name: str) -> dict:
         for stage in self.get_stages():
@@ -35,28 +36,6 @@ class ScraperConfiguration:
 
     def get_stages(self) -> list:
         return self.configuration['stages']
-
-    def get_name(self) -> str:
-        return self.configuration['name']
-
-
-class ScraperPage:
-    def __init__(self, db: ScraperDb, task: dict):
-        self.logger = get_logger()
-
-        self.db = db
-        self.task = task
-        self.data = None
-
-        if not {'configuration', 'stage', 'url'}.issubset(task.keys()):
-            raise ScraperProcessingException('Failed to validate task')
-
-    def get_from_db(self):
-        if not self.data:
-            self.data = self.db.has_page(self.task['configuration'], self.task['stage'], self.task['url'])
-
-    def is_version_indexed(self, cache_path: str):
-        return self.db.has_version(cache_path)
 
 
 class ScraperClient:
@@ -90,7 +69,14 @@ class ScraperClient:
                         expires = configuration.get_expire_time(step['stage'])
 
                         for url in step['urls']:
-                            self.queue_url_for_downloading(configuration_name, step['stage'], url, expires)
+                            page_for_downloading = {
+                                'configuration': configuration_name,
+                                'expires': expires,
+                                'stage': step['stage'],
+                                'url': url
+                            }
+
+                            self.queue_page_for_downloading(page_for_downloading)
 
     def get_configuration_by_name(self, name: str) -> ScraperConfiguration:
         for configuration in self.configurations:
@@ -140,6 +126,7 @@ class ScraperClient:
 
         response['html'] = html
         response['path'] = path
+        response['timestamp'] = timestamp
 
         if html:
             self.logger.debug('Page "%s" found in cache (%d)', url, expires)
@@ -162,10 +149,9 @@ class ScraperClient:
 
                 response['cache'] = False
                 response['path'] = path
+                response['timestamp'] = timestamp
             else:
                 self.logger.error('Failed to download page "{}"'.format(url))
-
-        response['timestamp'] = get_timestamp()
 
         return response
 
@@ -179,7 +165,7 @@ class ScraperClient:
 
         return url
 
-    def process_attributes(self, soup: BeautifulSoup, configuration_name: str, stage_name: str, url: str, cache_path: str, attributes: dict) -> dict:
+    def process_attributes(self, soup: BeautifulSoup, configuration_name: str, stage_name: str, url: str, cache_path: str, attributes: dict, timestamp: str) -> dict:
         data = {}
 
         for name, selector in attributes.items():
@@ -213,7 +199,16 @@ class ScraperClient:
                         data[name] = value
 
         if data:
-            self.queue_attributes_for_indexing(configuration_name, stage_name, url, cache_path, data)
+            attributes_for_indexing = {
+                'attributes': data,
+                'cache_path': cache_path,
+                'configuration': configuration_name,
+                'stage': stage_name,
+                'timestamp': timestamp,
+                'url': url
+            }
+
+            self.queue_page_for_indexing('versions', attributes_for_indexing)
 
         return data
 
@@ -233,7 +228,14 @@ class ScraperClient:
         random.shuffle(sub_urls)
 
         for sub_url in sub_urls:
-            self.queue_url_for_downloading(configuration_name, stage_name, sub_url, expires)
+            page_for_downloading = {
+                'configuration': configuration_name,
+                'expires': expires,
+                'stage': stage_name,
+                'url': sub_url
+            }
+
+            self.queue_page_for_downloading(page_for_downloading)
 
     def index_stats(self, configuration_name: str, body_json: dict, response: dict):
         stats = {
@@ -281,9 +283,24 @@ class ScraperClient:
                     self.index_stats(configuration_name, body_json, response)
 
                     if response['html']:
-                        self.queue_page_for_parsing(
-                            configuration_name, body_json['stage'], body_json['url'], response['path']
-                        )
+                        page_for_indexing = {
+                            'configuration': configuration_name,
+                            'stage': body_json['stage'],
+                            'timestamp': response['timestamp'],
+                            'url': body_json['url']
+                        }
+
+                        self.queue_page_for_indexing('pages', page_for_indexing)
+
+                        page_for_parsing = {
+                            'cache_path': response['path'],
+                            'configuration': configuration_name,
+                            'stage': body_json['stage'],
+                            'timestamp': response['timestamp'],
+                            'url': body_json['url']
+                        }
+
+                        self.queue_page_for_parsing(page_for_parsing)
 
                     self.logger.debug('Message processed')
             except Exception as e:
@@ -321,7 +338,7 @@ class ScraperClient:
                 for step in stage['steps']:
                     if 'attributes' in step:
                         attributes = self.process_attributes(
-                            soup, configuration_name, stage_name, body_json['url'], body_json['cache_path'], step['attributes']
+                            soup, configuration_name, stage_name, body_json['url'], body_json['cache_path'], step['attributes'], body_json['timestamp']
                         )
 
                         self.logger.debug('attributes: %s', attributes)
@@ -338,7 +355,14 @@ class ScraperClient:
                         expires = configuration.get_expire_time(step['stage'])
 
                         for url in step['urls']:
-                            self.queue_url_for_downloading(configuration_name, step['stage'], url, expires)
+                            page_for_downloading = {
+                                'configuration': configuration_name,
+                                'expires': expires,
+                                'stage': step['stage'],
+                                'url': url
+                            }
+
+                            self.queue_page_for_downloading(page_for_downloading)
 
                     self.logger.debug('Message processed')
             except Exception as e:
@@ -364,7 +388,12 @@ class ScraperClient:
                     raise ScraperProcessingException(e)
 
                 try:
-                    self.db.index_page(body_json)
+                    if body_json['index'] == 'pages':
+                        self.db.index_page(body_json['data'])
+                    elif body_json['index'] == 'versions':
+                        self.db.index_version(body_json['data'])
+                    else:
+                        raise Exception('Invalid index: %s', body_json['index'])
                 except DuplicateKeyError as e:
                     self.logger.warn('Failed to index page: %s', e)
 
@@ -378,42 +407,19 @@ class ScraperClient:
             finally:
                 self.queue.ack(method_frame.delivery_tag)
 
-    def queue_url_for_downloading(self, configuration: str, stage: str, url: str, expires: int):
-        self.logger.info('Queuing for downloading %s, %s, %s, %s', configuration, stage, url, expires)
+    def queue_page_for_downloading(self, data: dict):
+        self.queue_value(get_queue_name(data['configuration'], 'downloader'), json.dumps(data))
 
-        data = {
-            'configuration': configuration,
-            'expires': expires,
-            'stage': stage,
-            'url': url
+    def queue_page_for_parsing(self, data: dict):
+        self.queue_value(get_queue_name(data['configuration'], 'parser'), json.dumps(data))
+
+    def queue_page_for_indexing(self, index: str, data: dict):
+        body = {
+            'data': data,
+            'index': index
         }
-
-        self.queue_value(get_queue_name(configuration, 'downloader'), json.dumps(data))
-
-    def queue_page_for_parsing(self, configuration: str, stage: str, url: str, cache_path: str):
-        self.logger.info('Queuing for parsing %s, %s, %s', configuration, stage, cache_path)
-
-        data = {
-            'cache_path': cache_path,
-            'configuration': configuration,
-            'stage': stage,
-            'url': url
-        }
-
-        self.queue_value(get_queue_name(configuration, 'parser'), json.dumps(data))
-
-    def queue_attributes_for_indexing(self, configuration: str, stage: str, url: str, cache_path: str, attributes: dict):
-        self.logger.info('Queuing for indexing %s, %s, %s', configuration, stage, attributes)
-
-        data = {
-            'attributes': attributes,
-            'cache_path': cache_path,
-            'configuration': configuration,
-            'stage': stage,
-            'url': url
-        }
-
-        self.queue_value(get_queue_name(configuration, 'indexer'), json.dumps(data))
+        
+        self.queue_value(get_queue_name(data['configuration'], 'indexer'), json.dumps(body))
 
     def queue_value(self, queue, value):
         self.logger.debug('ScraperClient.queue_value(%s, %s)', queue, value)
