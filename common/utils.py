@@ -194,8 +194,9 @@ def get_configurations():
 class ExecutionTime:
     def __init__(self, name: str, gauge: Gauge = None):
         self.name = name
-        self.start = None
         self.gauge = gauge
+
+        self.start = None
 
     def __enter__(self):
         self.start = get_time()
