@@ -24,3 +24,8 @@
 #search-results .search-item .image-normal {
     height: 310px;
 }
+
+#card-details .key {
+    text-align: right;
+    width: 120px;
+}

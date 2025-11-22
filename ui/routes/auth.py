@@ -1,21 +1,22 @@
 import hashlib
 
-from flask import make_response, redirect, render_template, request
+from flask import Blueprint, make_response, redirect, render_template, request
 from flask_login import current_user, login_user, logout_user
 from http import HTTPStatus
 
 import config
 
-from app import app, User
+from app_user import User
 from helpers import make_url, send_delete, send_post
 from log import get_logger
 from schemas import validate_user
 
 
+blueprint = Blueprint('auth', __name__)
 logger = get_logger()
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@blueprint.route('/login', methods=['GET', 'POST'])
 def route_login():
     logger.debug('current_user: %s', current_user)
 
@@ -58,7 +59,7 @@ def route_login():
     return render_template('auth.html', **variables)
 
 
-@app.route('/logout')
+@blueprint.route('/logout')
 def route_logout():
     logger.debug('current_user: %s', current_user)
 

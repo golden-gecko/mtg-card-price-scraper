@@ -1,10 +1,11 @@
-from flask import render_template
+from flask import Blueprint, render_template
 from flask_login import login_required
 
-from app import app
+
+blueprint = Blueprint('profile', __name__)
 
 
-@app.route('/profile')
+@blueprint.route('/profile')
 @login_required
 def route_profile():
     return render_template('profile.html', active_page='profile')

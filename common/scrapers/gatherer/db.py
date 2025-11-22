@@ -49,12 +49,7 @@ class GathererDb:
         }
 
         projection = {
-            '_id': 0,
-            'card_id': 1,
-            'oracle.name': 1,
-            'oracle.rarity': 1,
-            'oracle.set': 1,
-            'oracle.type': 1
+            '_id': 0
         }
 
         return self.db.cards.find_one(query, projection)
@@ -63,16 +58,16 @@ class GathererDb:
         query = {
         }
 
-        if 'all_versions' in params and params['all_versions']:
+        if not ('all_versions' in params and params['all_versions']):
             query['main'] = True
 
         """
         if 'block' in params and params['block']:
             query['oracle.block'] = params['block']
+        """
 
         if 'color' in params and params['color']:
-            query['oracle.color'] = params['color']
-        """
+            query['oracle.mana'] = params['color']
 
         if 'expansion' in params and params['expansion']:
             query['oracle.set'] = params['expansion']
@@ -91,15 +86,11 @@ class GathererDb:
         if 'type' in params and params['type']:
             query['oracle.type'] = params['type']
 
-        """
         if 'subtype' in params and params['subtype']:
-            query['oracle.subtype'] = params['subtype']
-        """
+            query['oracle.subtypes'] = params['subtype']
 
         projection = {
-            '_id': 0,
-            'card_id': 1,
-            'oracle': 1
+            '_id': 0
         }
 
         self.logger.debug('query: %s', query)

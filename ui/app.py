@@ -1,13 +1,18 @@
-import jwt
-
 from flask import Flask, render_template, request
-from flask_login import LoginManager, UserMixin
+from flask_login import LoginManager
 from http import HTTPStatus
 
 import config
 
 from helpers import make_url, send_get
 from log import get_logger
+from routes.auth import blueprint as auth_blueprint
+from routes.card import blueprint as card_blueprint
+from routes.contact import blueprint as contact_blueprint
+from routes.index import blueprint as index_blueprint
+from routes.profile import blueprint as profile_blueprint
+from routes.register import blueprint as register_blueprint
+from routes.search import blueprint as search_blueprint
 
 
 def route_error(error):
@@ -18,6 +23,13 @@ logger = get_logger()
 
 app = Flask(__name__)
 app.config.from_object(config.Config)
+app.register_blueprint(auth_blueprint)
+app.register_blueprint(card_blueprint)
+app.register_blueprint(contact_blueprint)
+app.register_blueprint(index_blueprint)
+app.register_blueprint(profile_blueprint)
+app.register_blueprint(register_blueprint)
+app.register_blueprint(search_blueprint)
 
 codes = [
     HTTPStatus.BAD_REQUEST,
@@ -32,65 +44,6 @@ for code in codes:
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = '/login'
-
-
-class User(UserMixin):
-    def __init__(self, id=None, token=None, data=None):
-        logger.debug('User.__init__(): %s, %s, %s', id, token, data)
-
-        self.id = id
-        self.token = token
-        self.data = data
-
-        if not self.id and self.token:
-            try:
-                decoded = jwt.decode(self.token, app.config.get('SECRET_KEY'))
-            except jwt.ExpiredSignatureError as e:
-                logger.warning('Failed to decode token "%s": %s', self.token, e)
-                logger.debug('User.is_authenticated(): False (1)')
-            except jwt.InvalidTokenError as e:
-                logger.warning('Failed to decode token "%s": %s', self.token, e)
-                logger.debug('User.is_authenticated(): False (2)')
-            else:
-                self.id = decoded['identity']
-
-    @property
-    def is_authenticated(self):
-        logger.debug('User.is_authenticated()')
-
-        return True
-
-    @property
-    def is_active(self):
-        logger.debug('User.is_active(): %s, %s, %s', self.id, self.token, self.data)
-
-        return self.is_authenticated
-
-    @property
-    def is_anonymous(self):
-        logger.debug('User.is_anonymous(): %s, %s, %s', self.id, self.token, self.data)
-
-        return self.is_authenticated is False or self.is_active is False
-
-    def get_id(self):
-        logger.debug('User.get_id(): %s, %s, %s', self.id, self.token, self.data)
-
-        return self.id
-
-    def get_token(self):
-        logger.debug('User.get_token(): %s, %s, %s', self.id, self.token, self.data)
-
-        return self.token
-
-    def get_data(self):
-        logger.debug('User.get_token(): %s, %s, %s', self.id, self.token, self.data)
-
-        return self.data
-
-    def __repr__(self):
-        return '<User is_authenticated={}, is_active={}, is_anonymous={}, id={}, token={}, data={}>'.format(
-            self.is_authenticated, self.is_active, self.is_anonymous, self.get_id(), self.get_token(), self.get_data()
-        )
 
 
 @login_manager.user_loader
@@ -108,7 +61,7 @@ def load_user(id):
     if response.status_code != HTTPStatus.OK:
         return None
 
+    # TODO: Fix circular dependency.
+    from app_user import User
+
     return User(id=id, token=token, data=response.json()['data'])
-
-
-from routes import auth, card, index, profile, register, search

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="pl">
+    <head>
+        {% include 'components/meta.html' %}
+
+        <title>{% block title %}{% endblock %} - cenykart.pl</title>
+
+        {% include 'components/css.html' %}
+
+    </head>
+
+    <body>
+        {% include 'components/navigation.html' %}
+        {% include 'components/alert.html' %}
+
+        {% block content %}{% endblock %}
+
+        {% include 'components/js.html' %}
+    </body>
+</html>
