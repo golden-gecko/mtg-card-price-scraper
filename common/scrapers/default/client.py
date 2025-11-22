@@ -48,10 +48,23 @@ class ScraperClient:
 
         self.configurations = []
 
+        self.downloader = False
+        self.parser = False
+        self.indexer = False
+
     def add_configuration(self, configuration: ScraperConfiguration):
         self.logger.info('Adding configuration "%s"...', configuration.get_name())
 
         self.configurations.append(configuration)
+
+    def enable_downloader(self):
+        self.downloader = True
+
+    def enable_parser(self):
+        self.parser = True
+
+    def enable_indexer(self):
+        self.indexer = True
 
     def register_configurations(self):
         for configuration in self.configurations:
@@ -59,9 +72,14 @@ class ScraperClient:
 
             self.logger.debug('configuration_name: %s', configuration_name)
 
-            self.queue.add_callback(get_queue_name(configuration_name, 'downloader'), self.process_downloaders)
-            self.queue.add_callback(get_queue_name(configuration_name, 'parser'), self.process_parsers)
-            self.queue.add_callback(get_queue_name(configuration_name, 'indexer'), self.process_indexers)
+            if self.downloader:
+                self.queue.add_callback(get_queue_name(configuration_name, 'downloader'), self.process_downloaders)
+
+            if self.parser:
+                self.queue.add_callback(get_queue_name(configuration_name, 'parser'), self.process_parsers)
+
+            if self.indexer:
+                self.queue.add_callback(get_queue_name(configuration_name, 'indexer'), self.process_indexers)
 
             for stage in configuration.get_stages():
                 for step in stage['steps']:
@@ -432,7 +450,7 @@ class ScraperClient:
             'data': data,
             'index': index
         }
-        
+
         self.queue_value(get_queue_name(data['configuration'], 'indexer'), json.dumps(body))
 
     def queue_value(self, queue, value):
