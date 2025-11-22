@@ -3,7 +3,6 @@ import re
 import time
 
 from bs4 import BeautifulSoup
-from redis import Redis
 
 from log import get_logger
 from mongo import Mongo
@@ -21,10 +20,9 @@ class GathererClient:
     card_image_url = 'http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid={card_id}&type=card'
     card_printings_url = 'http://gatherer.wizards.com/Pages/Card/Printings.aspx?multiverseid={card_id}'
 
-    def __init__(self, mongo: Mongo, rabbit: RabbitClient, redis: Redis):
+    def __init__(self, mongo: Mongo, rabbit: RabbitClient):
         self.mongo = mongo
         self.rabbit = rabbit
-        self.redis = redis
 
         self.logger = get_logger(__name__)
 

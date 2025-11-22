@@ -37,7 +37,8 @@ services:
     image: mongo:4.2.0
     restart: always
     volumes:
-      - mongo:/data/db
+      - mongo_configdb:/data/configdb
+      - mongo_db:/data/db
 
   mongo_express:
     depends_on:
@@ -113,7 +114,8 @@ services:
 volumes:
   elasticsearch:
   kibana:
-  mongo:
+  mongo_configdb:
+  mongo_db:
   postgres:
   rabbit:
   redis:

@@ -1,18 +1,12 @@
-from flask import jsonify
-
-from models.card import Card
+from helpers import create_response
+from mongo import Mongo
 
 
 def route_cards():
-    cards = Card.query.all()
+    mongo = Mongo(host='mongo')
 
-    response = {
-        'data': {
-            'cards': cards
-        },
-        'status': {
-            'code': 200
-        }
+    data = {
+        'cards': [x for x in mongo.get_cards()]
     }
 
-    return jsonify(response)
+    return create_response(code=200, data=data)

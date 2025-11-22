@@ -1,18 +1,12 @@
-from flask import jsonify
-
-from models.type import Type
+from helpers import create_response
+from mongo import Mongo
 
 
 def route_types():
-    types = Type.query.all()
+    mongo = Mongo(host='mongo')
 
-    response = {
-        'data': {
-            'types': types
-        },
-        'status': {
-            'code': 200
-        }
+    data = {
+        'types': [x for x in mongo.get_types()]
     }
 
-    return jsonify(response)
+    return create_response(code=200, data=data)
