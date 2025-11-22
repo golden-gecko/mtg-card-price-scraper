@@ -12,6 +12,7 @@ from scrapers.default.cache import ScraperCache
 from scrapers.default.db import ScraperDb
 from scrapers.default.exceptions import ScraperProcessingException
 from scrapers.default.queue import ScraperQueue
+from scrapers.default.statistics import ScraperStatistics
 from utils import download, ExecutionTime, get_default_expiration_time, get_queue_name, load_file, wait
 
 
@@ -39,12 +40,13 @@ class ScraperConfiguration:
 
 
 class ScraperClient:
-    def __init__(self, cache: ScraperCache, db: ScraperDb, queue: ScraperQueue):
+    def __init__(self, cache: ScraperCache, db: ScraperDb, queue: ScraperQueue, statistics: ScraperStatistics):
         self.logger = get_logger()
 
         self.cache = cache
         self.db = db
         self.queue = queue
+        self.statistics = statistics
 
         self.configurations = []
 
@@ -109,6 +111,9 @@ class ScraperClient:
 
     def process(self):
         self.logger.info('Processing starting...')
+
+        if self.statistics:
+            self.statistics.run()
 
         retries = 0
         retries_max = 3
@@ -276,12 +281,17 @@ class ScraperClient:
             'url': body_json['url']
         }
 
+        if self.statistics:
+            # self.statistics.page_cache_age.set(stats['cache_age'])
+            self.statistics.page_download_total.inc()
+            # self.statistics.page_download_time.set(stats['download_time'])
+
         self.logger.debug('stats: %s', stats)
 
-        self.db.index_statistics(stats)
+        # self.db.index_statistics(stats)
 
     def process_downloaders(self, channel, method_frame, header_frame, body):
-        with ExecutionTime('Processing ({})'.format(method_frame.routing_key), self.db):
+        with ExecutionTime('Processing ({})'.format(method_frame.routing_key)):
             self.logger.debug('Received message "%s" from queue "%s"', body, method_frame.routing_key)
 
             body_json = body.decode('utf-8')
@@ -344,7 +354,7 @@ class ScraperClient:
                 self.queue.ack(method_frame.delivery_tag)
 
     def process_parsers(self, channel, method_frame, header_frame, body):
-        with ExecutionTime('Processing ({})'.format(method_frame.routing_key), self.db):
+        with ExecutionTime('Processing ({})'.format(method_frame.routing_key)):
             self.logger.debug('Received message "%s" from queue "%s"', body, method_frame.routing_key)
 
             body_json = body.decode('utf-8')
@@ -362,22 +372,30 @@ class ScraperClient:
                 stage_name = body_json['stage']
                 stage = configuration.get_stage(stage_name)
 
-                html = load_file(body_json['cache_path'])
+                if self.db.has_version(configuration_name, stage_name, body_json['cache_path']):
+                    return
 
-                soup = BeautifulSoup(html, 'lxml')
+                soup = None
 
                 for step in stage['steps']:
-                    if 'attributes' in step:
-                        attributes = self.process_attributes(
-                            soup, configuration_name, stage_name, body_json['url'], body_json['cache_path'], step['attributes'], body_json['timestamp']
-                        )
+                    if not self.db.has_version(configuration_name, stage_name, body_json['cache_path']):
+                        if 'attributes' in step:
+                            if not soup:
+                                soup = BeautifulSoup(load_file(body_json['cache_path']), 'lxml')
 
-                        self.logger.debug('attributes: %s', attributes)
+                            attributes = self.process_attributes(
+                                soup, configuration_name, stage_name, body_json['url'], body_json['cache_path'], step['attributes'], body_json['timestamp']
+                            )
+
+                            self.logger.debug('attributes: %s', attributes)
 
                     if 'selectors' in step:
                         expires = configuration.get_expire_time(step['stage'])
 
                         for selector in step['selectors']:
+                            if not soup:
+                                soup = BeautifulSoup(load_file(body_json['cache_path']), 'lxml')
+
                             self.process_selector(
                                 soup, configuration_name, step['stage'], body_json['url'], selector, expires
                             )
@@ -406,7 +424,7 @@ class ScraperClient:
                 self.queue.ack(method_frame.delivery_tag)
 
     def process_indexers(self, channel, method_frame, header_frame, body):
-        with ExecutionTime('Processing ({})'.format(method_frame.routing_key), self.db):
+        with ExecutionTime('Processing ({})'.format(method_frame.routing_key)):
             self.logger.debug('Received message "%s" from queue "%s"', body, method_frame.routing_key)
 
             body_json = body.decode('utf-8')
@@ -458,5 +476,5 @@ class ScraperClient:
     def queue_value(self, queue, value):
         self.logger.debug('ScraperClient.queue_value(%s, %s)', queue, value)
 
-        with ExecutionTime('Queuing', self.db):
+        with ExecutionTime('Queuing'):
             self.queue.publish(queue, value)

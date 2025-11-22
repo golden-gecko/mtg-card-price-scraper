@@ -1,25 +1,25 @@
 import threading
 
-from configurations import cardmarket, cardstore, centrum_mtg, channelfireball, e_legion, flamberg, futurex, \
-    gamesmasters, morigal, mtgstore, planeswalker, strefamtg
 from log import get_logger
 from scrapers.default.cache import ScraperCache
 from scrapers.default.client import ScraperConfiguration, ScraperClient
 from scrapers.default.db import ScraperDb
 from scrapers.default.queue import ScraperQueue
+from scrapers.default.statistics import ScraperStatistics
+from utils import get_configurations
 
 
 logger = get_logger()
 
 
-def process_pages(configuration):
+def process_pages(configuration, statistics):
     logger.info('Thread "%s" starting...', configuration['name'])
 
     cache = ScraperCache(directory='/data')
     db = ScraperDb(database='scraper')
     queue = ScraperQueue()
 
-    scraper = ScraperClient(cache=cache, db=db, queue=queue)
+    scraper = ScraperClient(cache=cache, db=db, queue=queue, statistics=statistics)
     scraper.add_configuration(ScraperConfiguration(configuration))
     scraper.enable_parser()
     scraper.process()
@@ -31,25 +31,13 @@ def main():
     logger.info('Service starting...')
 
     try:
-        configurations = []
-
-        configurations += cardmarket.configurations
-        configurations += cardstore.configurations
-        configurations += centrum_mtg.configurations
-        configurations += channelfireball.configurations
-        configurations += e_legion.configurations
-        configurations += flamberg.configurations
-        configurations += futurex.configurations
-        configurations += gamesmasters.configurations
-        configurations += morigal.configurations
-        configurations += mtgstore.configurations
-        configurations += planeswalker.configurations
-        configurations += strefamtg.configurations
+        statistics = ScraperStatistics()
+        statistics = None
 
         threads = []
 
-        for configuration in configurations:
-            x = threading.Thread(target=process_pages, args=(configuration, ))
+        for configuration in get_configurations():
+            x = threading.Thread(target=process_pages, args=(configuration, statistics))
             x.start()
 
             threads.append(x)
