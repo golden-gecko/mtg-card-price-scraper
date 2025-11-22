@@ -1,11 +1,13 @@
-import http
 import jwt
 
-from flask import Flask
-from flask_login import LoginManager
+from flask import Flask, request
+from flask_login import LoginManager, UserMixin
+from http import HTTPStatus
+from urllib.parse import urljoin
 
-from config import Config
-from helpers import create_response
+import config
+
+from helpers import create_response, send_get
 from log import get_logger
 
 
@@ -16,17 +18,17 @@ def route_error(error):
 logger = get_logger()
 
 app = Flask(__name__)
-app.config.from_object(Config)
+app.config.from_object(config.Config)
 
 codes = [
-    http.HTTPStatus.BAD_REQUEST,
-    http.HTTPStatus.UNAUTHORIZED,
-    http.HTTPStatus.FORBIDDEN,
-    http.HTTPStatus.NOT_FOUND,
-    http.HTTPStatus.METHOD_NOT_ALLOWED,
-    http.HTTPStatus.UNPROCESSABLE_ENTITY,
-    http.HTTPStatus.INTERNAL_SERVER_ERROR,
-    http.HTTPStatus.SERVICE_UNAVAILABLE
+    HTTPStatus.BAD_REQUEST,
+    HTTPStatus.UNAUTHORIZED,
+    HTTPStatus.FORBIDDEN,
+    HTTPStatus.NOT_FOUND,
+    HTTPStatus.METHOD_NOT_ALLOWED,
+    HTTPStatus.UNPROCESSABLE_ENTITY,
+    HTTPStatus.INTERNAL_SERVER_ERROR,
+    HTTPStatus.SERVICE_UNAVAILABLE
 ]
 
 for code in codes:
@@ -34,35 +36,84 @@ for code in codes:
 
 login_manager = LoginManager()
 login_manager.init_app(app)
+login_manager.login_view = '/login'
 
 
-class User:
-    def __init__(self, token):
+class User(UserMixin):
+    def __init__(self, id=None, token=None, data=None):
+        logger.debug('User.__init__(): %s, %s, %s', id, token, data)
+
+        self.id = id
         self.token = token
+        self.data = data
 
+        if not self.id and self.token:
+            try:
+                decoded = jwt.decode(self.token, app.config.get('SECRET_KEY'))
+            except jwt.ExpiredSignatureError as e:
+                logger.warning('Failed to decode token "%s": %s', self.token, e)
+                logger.debug('User.is_authenticated(): False (1)')
+            except jwt.InvalidTokenError as e:
+                logger.warning('Failed to decode token "%s": %s', self.token, e)
+                logger.debug('User.is_authenticated(): False (2)')
+            else:
+                self.id = decoded['identity']
+
+    @property
     def is_authenticated(self):
+        logger.debug('User.is_authenticated()')
+
         return True
 
+    @property
     def is_active(self):
-        return True
+        logger.debug('User.is_active(): %s, %s, %s', self.id, self.token, self.data)
 
+        return self.is_authenticated
+
+    @property
     def is_anonymous(self):
-        return False
+        logger.debug('User.is_anonymous(): %s, %s, %s', self.id, self.token, self.data)
+
+        return self.is_authenticated is False or self.is_active is False
 
     def get_id(self):
-        return ''
+        logger.debug('User.get_id(): %s, %s, %s', self.id, self.token, self.data)
+
+        return self.id
 
     def get_token(self):
+        logger.debug('User.get_token(): %s, %s, %s', self.id, self.token, self.data)
+
         return self.token
 
+    def get_data(self):
+        logger.debug('User.get_token(): %s, %s, %s', self.id, self.token, self.data)
+
+        return self.data
+
     def __repr__(self):
-        return '<User is_authenticated={}, is_active={}, is_anonymous={}, id={}, token={}>'.format(
-            self.is_authenticated(), self.is_active(), self.is_anonymous(), self.get_id(), self.get_token()
+        return '<User is_authenticated={}, is_active={}, is_anonymous={}, id={}, token={}, data={}>'.format(
+            self.is_authenticated, self.is_active, self.is_anonymous, self.get_id(), self.get_token(), self.get_data()
         )
 
+
 @login_manager.user_loader
-def load_user(token):
-    return User(token)
+def load_user(id):
+    logger.debug('load_user(): %s', id)
+
+    token = request.cookies.get('jwt')
+
+    headers = {
+        'Authorization': 'Bearer {}'.format(token)
+    }
+
+    response = send_get(urljoin(config.API_URL, '/'.join(['users', id])), headers=headers)
+
+    if response.status_code != HTTPStatus.OK:
+        return None
+
+    return User(id=id, token=token, data=response.json()['data'])
 
 
-from routes import account, auth, index, register, search
+from routes import auth, index, profile, register, search

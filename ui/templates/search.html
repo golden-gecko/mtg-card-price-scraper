@@ -22,6 +22,8 @@
                             <label for="search-block" class="col col-form-label">Block</label>
                             <div class="col">
                                 <select id="search-block" class="form-control"  name="block">
+                                    <option value=""></option>
+
                                     {% if blocks %}
                                         {% for block in blocks %}
                                             <option value="{{ block.name }}">{{ block.name }}</option>
@@ -35,6 +37,8 @@
                             <label for="search-color" class="col col-form-label">Color</label>
                             <div class="col">
                                 <select id="search-color" class="form-control"  name="color">
+                                    <option value=""></option>
+
                                     {% if colors %}
                                         {% for color in colors %}
                                             <option value="{{ color.name }}">{{ color.name }}</option>
@@ -48,6 +52,8 @@
                             <label for="search-expansion" class="col col-form-label">Expansion</label>
                             <div class="col">
                                 <select id="search-expansion" class="form-control" name="expansion">
+                                    <option value=""></option>
+
                                     {% if expansions %}
                                         {% for expansion in expansions %}
                                             <option value="{{ expansion.name }}">{{ expansion.name }}</option>
@@ -61,6 +67,8 @@
                             <label for="search-format" class="col col-form-label">Format</label>
                             <div class="col">
                                 <select id="search-format" class="form-control" name="format">
+                                    <option value=""></option>
+
                                     {% if formats %}
                                         {% for format in formats %}
                                             <option value="{{ format.name }}">{{ format.name }}</option>
@@ -74,6 +82,8 @@
                             <label for="search-rarity" class="col col-form-label">Rarity</label>
                             <div class="col">
                                 <select id="search-rarity" class="form-control"  name="rarity">
+                                    <option value=""></option>
+
                                     {% if rarities %}
                                         {% for rarity in rarities %}
                                             <option value="{{ rarity.name }}">{{ rarity.name }}</option>
@@ -87,6 +97,8 @@
                             <label for="search-type" class="col col-form-label">Type</label>
                             <div class="col">
                                 <select id="search-type" class="form-control"  name="type">
+                                    <option value=""></option>
+
                                     {% if types %}
                                         {% for type in types %}
                                             <option value="{{ type.name }}">{{ type.name }}</option>
@@ -100,6 +112,8 @@
                             <label for="search-subtype" class="col col-form-label">Subtype</label>
                             <div class="col">
                                 <select id="search-subtype" class="form-control"  name="subtype">
+                                    <option value=""></option>
+
                                     {% if subtypes %}
                                         {% for subtype in subtypes %}
                                             <option value="{{ subtype.name }}">{{ subtype.name }}</option>
@@ -190,7 +204,7 @@
 
                     $('<option>').appendTo(element);
 
-                    $.getJSON(this.api_url + type, function(json) {
+                    $.getJSON(this.api_url + ['mtg', type].join('/'), function(json) {
                         $.each(json['data'][type], function(k, v) {
                             var option = $('<option>');
 
@@ -204,7 +218,7 @@
                 search() {
                     var that = this;
 
-                    $.getJSON(that.api_url + 'cards?' + that.search_form.serialize(), function(json) {
+                    $.getJSON(that.api_url + ['mtg', 'cards'].join('/') + '?' + that.search_form.serialize(), function(json) {
                         that.search_results.empty();
 
                         $.each(json['data']['cards'], function(k, v) {

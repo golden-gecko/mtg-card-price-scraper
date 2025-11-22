@@ -1,6 +1,10 @@
 from flask import render_template
 
 from app import app
+from log import get_logger
+
+
+logger = get_logger()
 
 
 @app.route('/')

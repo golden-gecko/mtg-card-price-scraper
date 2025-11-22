@@ -1,7 +1,8 @@
 import hashlib
-import http
 
-from flask import render_template, request
+from flask import redirect, render_template, request
+from flask_login import current_user
+from http import HTTPStatus
 from urllib.parse import urljoin
 
 import config
@@ -17,6 +18,11 @@ logger = get_logger()
 
 @app.route('/register', methods=['GET', 'POST'])
 def route_register():
+    logger.debug('current_user: %s', current_user)
+
+    if current_user.is_authenticated:
+        return redirect('/')
+
     variables = {
         'active_page': 'account'
     }
@@ -36,7 +42,7 @@ def route_register():
 
             response = send_post(urljoin(config.API_URL, 'users'), json=data)
 
-            if response.status_code == http.HTTPStatus.OK:
+            if response.status_code == HTTPStatus.OK:
                 variables['status'] = True
                 variables['message'] = 'User registered'
             else:

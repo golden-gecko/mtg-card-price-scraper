@@ -80,7 +80,7 @@ paths:
       tags:
       - User
       summary: Registers new user
-      operationId: routes.users.route_users
+      operationId: routes.users.route_add_user
       requestBody:
         content:
           application/json:
@@ -93,7 +93,7 @@ paths:
                 password_hash:
                   type: string
                   example: ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb
-        required: false
+        required: true
       responses:
         200:
           description: Success
@@ -101,13 +101,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response'
-      x-codegen-request-body-name: page
-  /blocks:
+  /users/{user_id}:
+    get:
+      tags:
+        - User
+      summary: Returns user data
+      operationId: routes.users.route_get_user
+      parameters:
+      - name: user_id
+        in: path
+        description: ID of user
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /mtg/blocks:
     get:
       tags:
       - MTG
       summary: Return block list
-      operationId: routes.blocks.route_blocks
+      operationId: routes.mtg.blocks.route_get_blocks
       responses:
         200:
           description: Success
@@ -115,12 +134,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response'
-  /cards:
+  /mtg/cards:
     get:
       tags:
       - MTG
       summary: Return card list
-      operationId: routes.cards.route_cards
+      operationId: routes.mtg.cards.route_get_cards
       parameters:
       - name: block
         in: query
@@ -169,12 +188,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response'
-  /colors:
+  /mtg/colors:
     get:
       tags:
       - MTG
       summary: Return color list
-      operationId: routes.colors.route_colors
+      operationId: routes.mtg.colors.route_get_colors
       responses:
         200:
           description: Success
@@ -182,12 +201,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response'
-  /expansions:
+  /mtg/expansions:
     get:
       tags:
       - MTG
       summary: Return expansion list
-      operationId: routes.expansions.route_expansions
+      operationId: routes.mtg.expansions.route_get_expansions
       responses:
         200:
           description: Success
@@ -195,12 +214,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response'
-  /formats:
+  /mtg/formats:
     get:
       tags:
       - MTG
       summary: Return format list
-      operationId: routes.formats.route_formats
+      operationId: routes.mtg.formats.route_get_formats
       responses:
         200:
           description: Success
@@ -208,12 +227,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response'
-  /rarities:
+  /mtg/rarities:
     get:
       tags:
       - MTG
       summary: Return rarity list
-      operationId: routes.rarities.route_rarities
+      operationId: routes.mtg.rarities.route_get_rarities
       responses:
         200:
           description: Success
@@ -221,12 +240,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response'
-  /subtypes:
+  /mtg/subtypes:
     get:
       tags:
       - MTG
       summary: Return subtype list
-      operationId: routes.subtypes.route_subtypes
+      operationId: routes.mtg.subtypes.route_get_subtypes
       responses:
         200:
           description: Success
@@ -234,12 +253,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response'
-  /types:
+  /mtg/types:
     get:
       tags:
       - MTG
       summary: Return type list
-      operationId: routes.types.route_types
+      operationId: routes.mtg.types.route_get_types
       responses:
         200:
           description: Success
@@ -254,8 +273,9 @@ paths:
       summary: Queue page for refreshing
       operationId: routes.scrapers.default.route_pages_put
       requestBody:
+        required: true
         content:
-          '*/*':
+          application/json:
             schema:
               type: object
               properties:
@@ -268,7 +288,6 @@ paths:
                 url:
                   type: string
                   example: https://shop/products
-        required: false
       responses:
         200:
           description: Success
@@ -276,15 +295,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response'
-      x-codegen-request-body-name: page
     post:
       tags:
       - Scraper
       summary: Queue page for indexing
       operationId: routes.scrapers.default.route_pages_post
       requestBody:
+        required: true
         content:
-          '*/*':
+          application/json:
             schema:
               type: object
               properties:
@@ -297,7 +316,6 @@ paths:
                 url:
                   type: string
                   example: https://shop/products
-        required: false
       responses:
         200:
           description: Success

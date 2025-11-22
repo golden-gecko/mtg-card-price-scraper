@@ -1,8 +1,8 @@
 import hashlib
-import http
 
 from flask import make_response, redirect, render_template, request
-from flask_login import current_user, login_required, login_user, logout_user
+from flask_login import current_user, login_user, logout_user
+from http import HTTPStatus
 from urllib.parse import urljoin
 
 import config
@@ -20,8 +20,11 @@ logger = get_logger()
 def route_login():
     logger.debug('current_user: %s', current_user)
 
+    if current_user.is_authenticated:
+        return redirect('/')
+
     variables = {
-        'active_page': 'account'
+        'active_page': 'profile'
     }
 
     if request.method == 'POST':
@@ -39,14 +42,14 @@ def route_login():
 
             api_response = send_post(urljoin(config.API_URL, 'auth'), json=data)
 
-            if api_response.status_code == http.HTTPStatus.OK:
+            if api_response.status_code == HTTPStatus.OK:
                 variables['status'] = True
                 variables['message'] = 'User authorized'
 
                 response = make_response(render_template('auth.html', **variables))
                 response.set_cookie('jwt', api_response.json()['data']['access_token'])
 
-                login_user(User(api_response.json()['data']['access_token']))
+                login_user(User(token=api_response.json()['data']['access_token']))
 
                 return response
             else:
@@ -57,9 +60,11 @@ def route_login():
 
 
 @app.route('/logout')
-@login_required
 def route_logout():
     logger.debug('current_user: %s', current_user)
+
+    if not current_user.is_authenticated:
+        return redirect('/')
 
     headers = {
         'Authorization': 'Bearer {}'.format(current_user.get_token())
@@ -68,7 +73,7 @@ def route_logout():
     api_response = send_post(urljoin(config.API_URL, 'auth'), headers=headers)
 
     variables = {
-        'active_page': 'account'
+        'active_page': 'profile'
     }
 
     if api_response.status_code == 200:
@@ -78,6 +83,6 @@ def route_logout():
         variables['status'] = False
         variables['message'] = 'Failed to log out user'
 
-    # logout_user()
+    logout_user()
 
     return render_template('auth.html', **variables)

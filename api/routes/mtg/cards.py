@@ -4,7 +4,7 @@ from helpers import create_response
 from scrapers.gatherer.db import GathererDb
 
 
-def route_cards():
+def route_get_cards():
     db = GathererDb(host='mongo')
 
     cards = db.get_cards(

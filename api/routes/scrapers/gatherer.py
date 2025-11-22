@@ -6,7 +6,7 @@ from scrapers.gatherer.db import GathererDb
 from scrapers.gatherer.queue import GathererQueue
 
 
-def route_cards(card_id):
+def route_cards(card_id: int):
     db = GathererDb(host='mongo')
 
     queue = GathererQueue(host='rabbit')
@@ -18,7 +18,7 @@ def route_cards(card_id):
     return create_response()
 
 
-def route_pages(page_id):
+def route_pages(page_id: int):
     db = GathererDb(host='mongo')
 
     queue = GathererQueue(host='rabbit')

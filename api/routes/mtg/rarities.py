@@ -2,11 +2,11 @@ from helpers import create_response
 from scrapers.gatherer.db import GathererDb
 
 
-def route_expansions():
+def route_get_rarities():
     db = GathererDb(host='mongo')
 
     data = {
-        'expansions': db.get_expansions()
+        'rarities': db.get_rarities()
     }
 
     return create_response(data=data)

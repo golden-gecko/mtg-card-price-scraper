@@ -1,10 +1,10 @@
 import connexion
-import http
 import os
 
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
+from http import HTTPStatus
 
 from config import Config
 from helpers import create_response
@@ -22,14 +22,14 @@ app = connexion_app.app
 app.config.from_object(Config)
 
 codes = [
-    http.HTTPStatus.BAD_REQUEST,
-    http.HTTPStatus.UNAUTHORIZED,
-    http.HTTPStatus.FORBIDDEN,
-    http.HTTPStatus.NOT_FOUND,
-    http.HTTPStatus.METHOD_NOT_ALLOWED,
-    http.HTTPStatus.UNPROCESSABLE_ENTITY,
-    http.HTTPStatus.INTERNAL_SERVER_ERROR,
-    http.HTTPStatus.SERVICE_UNAVAILABLE
+    HTTPStatus.BAD_REQUEST,
+    HTTPStatus.UNAUTHORIZED,
+    HTTPStatus.FORBIDDEN,
+    HTTPStatus.NOT_FOUND,
+    HTTPStatus.METHOD_NOT_ALLOWED,
+    HTTPStatus.UNPROCESSABLE_ENTITY,
+    HTTPStatus.INTERNAL_SERVER_ERROR,
+    HTTPStatus.SERVICE_UNAVAILABLE
 ]
 
 for code in codes:
@@ -41,25 +41,25 @@ migrate = Migrate(app, db)
 
 
 @jwt.expired_token_loader
-def expired_token_loader_callback():
+def expired_token_loader_callback(token):
     return create_response(
-        code=http.HTTPStatus.UNAUTHORIZED,
+        code=HTTPStatus.UNAUTHORIZED,
         message='Token has expired'
     )
 
 
 @jwt.invalid_token_loader
-def expired_token_loader_callback():
+def expired_token_loader_callback(token):
     return create_response(
-        code=http.HTTPStatus.UNPROCESSABLE_ENTITY,
+        code=HTTPStatus.UNPROCESSABLE_ENTITY,
         message='Token is invalid'
     )
 
 
 @jwt.revoked_token_loader
-def expired_token_loader_callback():
+def expired_token_loader_callback(token):
     return create_response(
-        code=http.HTTPStatus.UNAUTHORIZED,
+        code=HTTPStatus.UNAUTHORIZED,
         message='Token has been revoked'
     )
 

@@ -2,7 +2,7 @@ from helpers import create_response
 from scrapers.gatherer.db import GathererDb
 
 
-def route_types():
+def route_get_types():
     db = GathererDb(host='mongo')
 
     data = {

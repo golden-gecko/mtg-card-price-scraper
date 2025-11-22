@@ -5,6 +5,15 @@
     <body>
         {% include 'components/navigation.html' %}
         {% include 'components/alert.html' %}
+
+        <div class="container">
+            <div class="row">
+                <div class="col-3 py-3 px-lg-3">
+                    <p>E-mail: {{ current_user.get_data().email }}</p>
+                </div>
+            </div>
+        </div>
+
         {% include 'components/footer.html' %}
     </body>
 </html>
