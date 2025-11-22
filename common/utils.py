@@ -159,12 +159,24 @@ def sort_keys(value: dict) -> dict:
 
 
 class ExecutionTime:
-    def __init__(self, name: str):
+    def __init__(self, name: str, db = None):
         self.name = name
         self.start = None
+        self.db = db
 
     def __enter__(self):
         self.start = get_time()
 
     def __exit__(self, type, value, traceback):
+        duration = get_duration(self.start)
+
         logger.debug('%s took %s seconds', self.name, get_duration(self.start))
+
+        if self.db:
+            data = {
+                'name': self.name,
+                'processing_time': duration,
+                'timestamp': get_timestamp()
+            }
+
+            self.db.index_processing_time(data)

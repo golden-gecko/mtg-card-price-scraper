@@ -1,90 +1,50 @@
 openapi: 3.0.1
+
 info:
   title: API
   version: 1.0.0
+
 servers:
 - url: /v1
+
 tags:
-- name: Auth
+- name: Authentication
+- name: Cards
 - name: Maintenance
-- name: MTG
-- name: Scraper
-- name: User
+- name: Scrapers
+- name: Users
+
 paths:
+
   /healthcheck:
+
     get:
       tags:
-      - Maintenance
+        - Maintenance
       summary: Returns service status
       operationId: routes.healthcheck.route_healthcheck
       responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response'
+        '200':
+          $ref: '#/components/responses/response_ok'
+
   /auth:
-    post:
-      tags:
-      - Auth
-      summary: Logs in user and returns access and refresh token
-      operationId: routes.auth.route_login
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [email, password_hash]
-              properties:
-                email:
-                  type: string
-                  format: email
-                  example: john@doe.com
-                password_hash:
-                  type: string
-                  minLength: 64
-                  maxLength: 64
-      responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response'
+
     delete:
       tags:
-      - Auth
+        - Authentication
       summary: Logs out user
-      operationId: routes.auth.route_logout
+      operationId: routes.authentication.route_logout
       responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response'
-  /refresh:
+        '200':
+          $ref: '#/components/responses/response_ok'
+
     post:
       tags:
-      - Auth
-      summary: Returns refresh token
-      operationId: routes.auth.route_refresh
-      responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response'
-  /users:
-    post:
-      tags:
-      - User
-      summary: Registers new user
-      operationId: routes.users.route_add_user
+        - Authentication
+      summary: Logs in user and returns access and refresh tokens
+      operationId: routes.authentication.route_login
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -92,280 +52,169 @@ paths:
               required: [email, password_hash]
               properties:
                 email:
-                  type: string
-                  format: email
-                  example: john@doe.com
+                  $ref: '#/components/schemas/e_mail'
                 password_hash:
-                  type: string
-                  minLength: 64
-                  maxLength: 64
-                  example: ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb
-        required: true
+                  $ref: '#/components/schemas/password_hash'
       responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response'
-  /users/{user_id}:
-    get:
-      tags:
-        - User
-      summary: Returns user data
-      operationId: routes.users.route_get_user
-      parameters:
-      - name: user_id
-        in: path
-        description: ID of user
-        required: true
-        schema:
-          type: string
-      responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response'
-  /mtg/artists:
-    get:
-      tags:
-      - MTG
-      summary: Return artist list
-      operationId: routes.mtg.artists.route_get_artists
-      responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response'
-  /mtg/blocks:
-    get:
-      tags:
-      - MTG
-      summary: Return block list
-      operationId: routes.mtg.blocks.route_get_blocks
-      responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response'
-  /mtg/cards:
-    get:
-      tags:
-      - MTG
-      summary: Return card list
-      operationId: routes.mtg.cards.route_get_cards
-      parameters:
-      - name: artist
-        in: query
-        description: Artist name
-        schema:
-          type: string
-      - name: block
-        in: query
-        description: Block name
-        schema:
-          type: string
-      - name: color
-        in: query
-        description: Card color
-        schema:
-          type: string
-      - name: format
-        in: query
-        description: Format name
-        schema:
-          type: string
-      - name: name
-        in: query
-        description: Card name
-        schema:
-          type: string
-      - name: numer
-        in: query
-        description: Card numer
-        schema:
-          type: integer
-      - name: rarity
-        in: query
-        description: Card rarity
-        schema:
-          type: string
-      - name: set
-        in: query
-        description: Set name
-        schema:
-          type: string
-      - name: subtype
-        in: query
-        description: Card subtype
-        schema:
-          type: string
-      - name: type
-        in: query
-        description: Card type
-        schema:
-          type: string
-      - name: watermark
-        in: query
-        description: Card watermark
-        schema:
-          type: string
-      responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response'
-  /mtg/cards/{card_id}:
-    get:
-      tags:
-      - MTG
-      summary: Return card details
-      operationId: routes.mtg.cards.route_get_card_details
-      parameters:
-      - name: card_id
-        in: path
-        description: ID of card
-        required: true
-        schema:
-          type: integer
-      responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response'
-  /mtg/colors:
-    get:
-      tags:
-      - MTG
-      summary: Return color list
-      operationId: routes.mtg.colors.route_get_colors
-      responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response'
-  /mtg/formats:
-    get:
-      tags:
-      - MTG
-      summary: Return format list
-      operationId: routes.mtg.formats.route_get_formats
-      responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response'
-  /mtg/rarities:
-    get:
-      tags:
-      - MTG
-      summary: Return rarity list
-      operationId: routes.mtg.rarities.route_get_rarities
-      responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response'
-  /mtg/sets:
-    get:
-      tags:
-      - MTG
-      summary: Return set list
-      operationId: routes.mtg.sets.route_get_sets
-      responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response'
-  /mtg/subtypes:
-    get:
-      tags:
-      - MTG
-      summary: Return subtype list
-      operationId: routes.mtg.subtypes.route_get_subtypes
-      responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response'
-  /mtg/watermarks:
-    get:
-      tags:
-      - MTG
-      summary: Return watermark list
-      operationId: routes.mtg.watermarks.route_get_watermarks
-      responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response'
-  /mtg/types:
-    get:
-      tags:
-      - MTG
-      summary: Return type list
-      operationId: routes.mtg.types.route_get_types
-      responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response'
-  /scrapers/default/pages:
-    put:
-      tags:
-      - Scraper
-      summary: Queue page for refreshing
-      operationId: routes.scrapers.default.route_pages_put
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                configuration:
-                  type: string
-                  example: shop
-                stage:
-                  type: string
-                  example: main
-                url:
-                  type: string
-                  example: https://shop/products
-      responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response'
+        '200':
+          $ref: '#/components/responses/response_ok'
+
+  /refresh:
+
     post:
       tags:
-      - Scraper
+        - Authentication
+      summary: Returns refresh token
+      operationId: routes.authentication.route_refresh
+      responses:
+        '200':
+          $ref: '#/components/responses/response_ok'
+
+  /cards/artists:
+
+    get:
+      tags:
+        - Cards
+      summary: Returns artist list
+      operationId: routes.cards.artists.route_get_artists
+      responses:
+        '200':
+          $ref: '#/components/responses/response_ok'
+
+  /cards/blocks:
+
+    get:
+      tags:
+        - Cards
+      summary: Returns block list
+      operationId: routes.cards.blocks.route_get_blocks
+      responses:
+        '200':
+          $ref: '#/components/responses/response_ok'
+
+  /cards/cards:
+
+    get:
+      tags:
+        - Cards
+      summary: Returns card list
+      operationId: routes.cards.cards.route_get_cards
+      parameters:
+        - $ref: '#/components/parameters/card_artist'
+        - $ref: '#/components/parameters/card_block'
+        - $ref: '#/components/parameters/card_color'
+        - $ref: '#/components/parameters/card_format'
+        - $ref: '#/components/parameters/card_name'
+        - $ref: '#/components/parameters/card_number'
+        - $ref: '#/components/parameters/card_rarity'
+        - $ref: '#/components/parameters/card_set'
+        - $ref: '#/components/parameters/card_subtype'
+        - $ref: '#/components/parameters/card_type'
+        - $ref: '#/components/parameters/card_watermark'
+      responses:
+        '200':
+          $ref: '#/components/responses/response_ok'
+
+  /cards/cards/{card_id}:
+
+    get:
+      tags:
+      - Cards
+      summary: Returns card details
+      operationId: routes.cards.cards.route_get_card_details
+      parameters:
+        - name: card_id
+          in: path
+          description: ID of card
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          $ref: '#/components/responses/response_ok'
+
+  /cards/colors:
+
+    get:
+      tags:
+        - Cards
+      summary: Returns color list
+      operationId: routes.cards.colors.route_get_colors
+      responses:
+        '200':
+          $ref: '#/components/responses/response_ok'
+
+  /cards/formats:
+
+    get:
+      tags:
+        - Cards
+      summary: Returns format list
+      operationId: routes.cards.formats.route_get_formats
+      responses:
+        '200':
+          $ref: '#/components/responses/response_ok'
+
+  /cards/rarities:
+
+    get:
+      tags:
+        - Cards
+      summary: Returns rarity list
+      operationId: routes.cards.rarities.route_get_rarities
+      responses:
+        '200':
+          $ref: '#/components/responses/response_ok'
+
+  /cards/sets:
+
+    get:
+      tags:
+        - Cards
+      summary: Returns set list
+      operationId: routes.cards.sets.route_get_sets
+      responses:
+        '200':
+          $ref: '#/components/responses/response_ok'
+
+  /cards/subtypes:
+
+    get:
+      tags:
+        - Cards
+      summary: Returns subtype list
+      operationId: routes.cards.subtypes.route_get_subtypes
+      responses:
+        '200':
+          $ref: '#/components/responses/response_ok'
+
+  /cards/types:
+
+    get:
+      tags:
+        - Cards
+      summary: Returns type list
+      operationId: routes.cards.types.route_get_types
+      responses:
+        '200':
+          $ref: '#/components/responses/response_ok'
+
+  /cards/watermarks:
+
+    get:
+      tags:
+        - Cards
+      summary: Returns watermark list
+      operationId: routes.cards.watermarks.route_get_watermarks
+      responses:
+        '200':
+          $ref: '#/components/responses/response_ok'
+
+  /scrapers/default/pages:
+
+    post:
+      tags:
+        - Scrapers
       summary: Queue page for indexing
       operationId: routes.scrapers.default.route_pages_post
       requestBody:
@@ -385,87 +234,249 @@ paths:
                   type: string
                   example: https://shop/products
       responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response'
+        '200':
+          $ref: '#/components/responses/response_ok'
+
+    put:
+      tags:
+        - Scrapers
+      summary: Queue page for refreshing
+      operationId: routes.scrapers.default.route_pages_put
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                configuration:
+                  type: string
+                  example: shop
+                stage:
+                  type: string
+                  example: main
+                url:
+                  type: string
+                  example: https://shop/products
+      responses:
+        '200':
+          $ref: '#/components/responses/response_ok'
+
   /scrapers/default/statistics:
+
     get:
       tags:
-      - Scraper
-      summary: Return statistics
+        - Scrapers
+      summary: Returns statistics
       operationId: routes.scrapers.default.route_statistics
       responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response'
+        '200':
+          $ref: '#/components/responses/response_ok'
+
   /scrapers/gatherer/cards/{card_id}:
+
     post:
       tags:
-      - Scraper
+        - Scrapers
       summary: Queue Gatherer card for processing
       operationId: routes.scrapers.gatherer.route_cards
       parameters:
-      - name: card_id
-        in: path
-        description: ID of Gatherer card
-        required: true
-        schema:
-          type: integer
-      - name: refresh
-        in: query
-        description: Refresh Gatherer card
-        schema:
-          type: boolean
+        - $ref: '#/components/parameters/card_id'
+        - $ref: '#/components/parameters/refresh'
       responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response'
+        '200':
+          $ref: '#/components/responses/response_ok'
+
   /scrapers/gatherer/pages/{page_id}:
+
     post:
       tags:
-      - Scraper
+        - Scrapers
       summary: Queue Gatherer page for processing
       operationId: routes.scrapers.gatherer.route_pages
       parameters:
-      - name: page_id
-        in: path
-        description: ID of Gatherer page
-        required: true
-        schema:
-          type: integer
-          format: int64
-      - name: refresh
-        in: query
-        description: Refresh Gatherer page
-        schema:
-          type: boolean
+        - $ref: '#/components/parameters/page_id'
+        - $ref: '#/components/parameters/refresh'
       responses:
-        200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response'
+        '200':
+          $ref: '#/components/responses/response_ok'
+
+  /users:
+
+    post:
+      tags:
+        - Users
+      summary: Registers new user
+      operationId: routes.users.route_add_user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password_hash]
+              properties:
+                e_mail:
+                  $ref: '#/components/schemas/e_mail'
+                password_hash:
+                  $ref: '#/components/schemas/password_hash'
+        required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/response_ok'
+
+  /users/{user_id}:
+
+    get:
+      tags:
+        - Users
+      summary: Returns user data
+      operationId: routes.users.route_get_user
+      parameters:
+        - name: user_id
+          in: path
+          description: ID of user
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/response_ok'
+
 components:
+
+  parameters:
+
+    card_artist:
+      in: query
+      name: artist
+      schema:
+        type: string
+        example: John
+
+    card_block:
+      in: query
+      name: block
+      schema:
+        type: string
+        example: Mirrodin
+
+    card_color:
+      in: query
+      name: color
+      schema:
+        type: string
+        example: Green
+
+    card_format:
+      in: query
+      name: format
+      schema:
+        type: string
+        example: Standard
+
+    card_id:
+      in: path
+      name: card_id
+      required: true
+      schema:
+        type: integer
+        format: int64
+        minimum: 0
+
+    card_name:
+      in: query
+      name: name
+      schema:
+        type: string
+        example: Troll
+
+    card_number:
+      in: query
+      name: number
+      schema:
+        type: integer
+        example: 42
+
+    card_rarity:
+      in: query
+      name: rarity
+      schema:
+        type: string
+        example: Rare
+
+    card_set:
+      in: query
+      name: set
+      schema:
+        type: string
+        example: Champions of Kamigawa
+
+    card_subtype:
+      in: query
+      name: subtype
+      schema:
+        type: string
+        example: Human
+
+    card_type:
+      in: query
+      name: type
+      schema:
+        type: string
+        example: Creature
+
+    card_watermark:
+      in: query
+      name: watermark
+      schema:
+        type: string
+        example: Apocalypse
+
+    page_id:
+      in: path
+      name: page_id
+      required: true
+      schema:
+        type: integer
+        format: int64
+        minimum: 0
+
+    refresh:
+      in: query
+      name: refresh
+      schema:
+        type: boolean
+
+  responses:
+
+    response_ok:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [code]
+            properties:
+              code:
+                type: integer
+                minimum: 100
+                maximum: 999
+                example: '200'
+              data:
+                type: object
+              message:
+                type: string
+                example: OK
+
   schemas:
-    Response:
-      type: object
-      required: [code]
-      properties:
-        code:
-          type: integer
-          example: 200
-        data:
-          type: object
-        message:
-          type: string
-          example: Success
+
+    e_mail:
+      type: string
+      format: email
+      example: john@doe.com
+
+    password_hash:
+      type: string
+      minLength: 64
+      maxLength: 64
+      example: ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb

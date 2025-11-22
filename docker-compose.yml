@@ -22,16 +22,31 @@ services:
     env_file:
       - .env
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://${API_HOST}:${API_PORT}/v1/healthcheck']
       interval: 10s
-      timeout: 2s
       retries: 2
+      test: ['CMD', 'curl', '-f', 'http://${API_HOST}:${API_PORT}/v1/healthcheck']
+      timeout: 2s
     networks:
       default:
         ipv4_address: ${API_HOST}
     ports:
       - ${API_PORT}:${API_PORT}
     restart: unless-stopped
+
+  consul:
+    command: agent -server -ui -node=server-1 -bootstrap-expect=1 -client=0.0.0.0 -data-dir /data
+    entrypoint: /bin/consul
+    env_file:
+      - .env
+    image: consul:1.6.3
+    networks:
+      default:
+        ipv4_address: ${CONSUL_HOST}
+    ports:
+      - ${CONSUL_PORT}:${CONSUL_PORT}
+    restart: unless-stopped
+    volumes:
+      - consul:/data
 
   elasticsearch:
     env_file:
@@ -155,6 +170,7 @@ services:
       context: .
       dockerfile: scraper_mtg/Dockerfile
     depends_on:
+      - elasticsearch
       - mongo
       - rabbit
     env_file:
@@ -193,6 +209,16 @@ services:
     volumes:
       - scraper_gatherer:/data:ro
 
+  telemetry:
+    build:
+      context: .
+      dockerfile: telemetry/Dockerfile
+    depends_on:
+      - elasticsearch
+    env_file:
+      - .env
+    restart: unless-stopped
+
   ui:
     build:
       context: .
@@ -203,10 +229,10 @@ services:
     env_file:
       - .env
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:${UI_PORT}/']
       interval: 10s
-      timeout: 2s
       retries: 2
+      test: ['CMD', 'curl', '-f', 'http://localhost:${UI_PORT}']
+      timeout: 2s
     networks:
       default:
         ipv4_address: ${UI_HOST}
@@ -215,6 +241,7 @@ services:
     restart: unless-stopped
 
 volumes:
+  consul:
   elasticsearch:
   kibana:
   mongo_configdb:

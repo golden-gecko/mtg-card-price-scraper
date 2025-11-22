@@ -245,7 +245,7 @@ class ScraperClient:
                     else:
                         stats['cache'] = True
 
-                    self.db.index_stats(stats)
+                    self.db.index_statistics(stats)
 
                 page = ScraperPage(self.db, task)
 
