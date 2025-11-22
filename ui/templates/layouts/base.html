@@ -23,6 +23,10 @@
     </div>
 {%- endmacro %}
 
+{% macro search_url(name, value, content) -%}
+    <a href="/search?{{ name }}={{ value }}" title="{{ value }}">{{ content }}</a>
+{%- endmacro %}
+
 {% macro symbol_image(symbol_name) -%}
     {% if symbol_name == 'Black' %}
         {% set symbol = 'B' %}

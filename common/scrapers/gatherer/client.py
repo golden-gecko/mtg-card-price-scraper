@@ -460,9 +460,27 @@ class GathererClient:
             try:
                 self.db.index_card(data)
             except pymongo.errors.DuplicateKeyError as e:
-                self.logger.warning('card %d already indexed: %s', card_id, e)
+                self.logger.warning('Card %d already indexed: %s', card_id, e)
+
+            if 'oracle' in data and 'artist' in data['oracle']:
+                self.index_attribute(data['oracle']['artist'], 'artists')
+
+            if 'printed' in data and 'artist' in data['printed']:
+                self.index_attribute(data['printed']['artist'], 'artists')
+
+            if 'oracle' in data and 'watermark' in data['oracle']:
+                self.index_attribute(data['oracle']['watermark'], 'watermarks')
+
+            if 'printed' in data and 'watermark' in data['printed']:
+                self.index_attribute(data['printed']['watermark'], 'watermarks')
 
             channel.basic_ack(delivery_tag=method_frame.delivery_tag)
+
+    def index_attribute(self, value, collection):
+        try:
+            self.db.index_attribute({'name': value}, collection)
+        except pymongo.errors.DuplicateKeyError as e:
+            self.logger.warning('Attribute %s already indexed: %s', value, e)
 
     def process_page(self, channel, method_frame, header_frame, body):
         with ExecutionTime('Processing page'):

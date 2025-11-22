@@ -10,6 +10,7 @@ class GathererDb:
         self.client = MongoClient(host)
 
         self.db = self.client.gatherer
+        self.db.artists.create_index([('name', ASCENDING)], unique=True)
         self.db.blocks.create_index([('name', ASCENDING)], unique=True)
         self.db.cards.create_index([('card_id', ASCENDING)], unique=True)
         self.db.colors.create_index([('name', ASCENDING)], unique=True)
@@ -18,6 +19,7 @@ class GathererDb:
         self.db.rarities.create_index([('name', ASCENDING)], unique=True)
         self.db.subtypes.create_index([('name', ASCENDING)], unique=True)
         self.db.types.create_index([('name', ASCENDING)], unique=True)
+        self.db.watermarks.create_index([('name', ASCENDING)], unique=True)
 
     def delete_blocks(self):
         return self.db.blocks.delete_many({})
@@ -40,6 +42,9 @@ class GathererDb:
     def delete_types(self):
         return self.db.types.delete_many({})
 
+    def get_artists(self) -> list:
+        return list(self.db.artists.find({}, {'_id': 0}).sort('name', ASCENDING))
+
     def get_blocks(self) -> list:
         return list(self.db.blocks.find({}, {'_id': 0}).sort('name', ASCENDING))
 
@@ -61,6 +66,9 @@ class GathererDb:
         if not ('all_versions' in params and params['all_versions']):
             query['main'] = True
 
+        if 'artist' in params and params['artist']:
+            query['oracle.artist'] = params['artist']
+
         """
         if 'block' in params and params['block']:
             query['oracle.block'] = params['block']
@@ -80,6 +88,9 @@ class GathererDb:
         if 'name' in params and params['name']:
             query['oracle.name'] = params['name']
 
+        if 'number' in params and params['number']:
+            query['oracle.number'] = params['number']
+
         if 'rarity' in params and params['rarity']:
             query['oracle.rarity'] = params['rarity']
 
@@ -88,6 +99,9 @@ class GathererDb:
 
         if 'subtype' in params and params['subtype']:
             query['oracle.subtypes'] = params['subtype']
+
+        if 'watermark' in params and params['watermark']:
+            query['oracle.watermark'] = params['watermark']
 
         projection = {
             '_id': 0
@@ -122,6 +136,15 @@ class GathererDb:
     def get_types(self) -> list:
         return list(self.db.types.find({}, {'_id': 0}).sort('name', ASCENDING))
 
+    def get_watermarks(self) -> list:
+        return list(self.db.watermarks.find({}, {'_id': 0}).sort('name', ASCENDING))
+
+    def index_artist(self, data) -> bool:
+        return self.db.artists.insert_one(data)
+
+    def index_attribute(self, value, collection):
+        return self.db[collection].insert_one(value)
+
     def index_block(self, data) -> bool:
         return self.db.blocks.insert_one(data)
 
@@ -136,6 +159,8 @@ class GathererDb:
         if 'oracle' in data and 'other_sets' in data['oracle']:
             if data['card_id'] == max(data['oracle']['other_sets']):
                 data['main'] = True
+        else:
+            data['main'] = True
 
         return self.db.cards.update(query, data, upsert=True)
 

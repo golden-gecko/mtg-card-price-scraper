@@ -31,10 +31,21 @@ def get_items(name, params=None):
 @blueprint.route('/search')
 def route_search():
     params = {
-        'name': request.args.get('name', default='')
+        'artist': request.args.get('artist', default=''),
+        'block': request.args.get('block', default=''),
+        'color': request.args.get('color', default=''),
+        'expansion': request.args.get('expansion', default=''),
+        'format': request.args.get('format', default=''),
+        'name': request.args.get('name', default=''),
+        'number': request.args.get('number', default=''),
+        'rarity': request.args.get('rarity', default=''),
+        'subtype': request.args.get('subtype', default=''),
+        'type': request.args.get('type', default=''),
+        'watermark': request.args.get('watermark', default='')
     }
 
     variables = {
+        'artists': get_items('artists'),
         'blocks': get_items('blocks'),
         'cards': get_items('cards', params=params),
         'colors': get_items('colors'),
@@ -42,7 +53,8 @@ def route_search():
         'formats': get_items('formats'),
         'rarities': get_items('rarities'),
         'subtypes': get_items('subtypes'),
-        'types': get_items('types')
+        'types': get_items('types'),
+        'watermarks': get_items('watermarks')
     }
 
     return render_template('search.html', active_page='search', **variables)

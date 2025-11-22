@@ -51,7 +51,7 @@ def main():
     logger.info('Service starting...')
 
     try:
-        process_search()
+        # process_search()
 
         threads = []
 
