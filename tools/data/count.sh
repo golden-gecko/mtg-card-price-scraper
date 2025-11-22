@@ -1,6 +1,7 @@
 #!/bin/bash -e
 
-cd "$(dirname "$0")"
+cd $(dirname ${0})
+cd ../..
 
 IMAGE=python:3.7.4-slim-buster
 
