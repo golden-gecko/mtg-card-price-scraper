@@ -1,9 +1,9 @@
 from helpers import create_response
-from mongo import Mongo
+from mongo import MongoMagic
 
 
 def route_types():
-    mongo = Mongo(host='mongo')
+    mongo = MongoMagic(host='mongo')
 
     data = {
         'types': [x for x in mongo.get_types()]

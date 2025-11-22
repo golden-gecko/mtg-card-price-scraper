@@ -17,7 +17,7 @@ connexion_app = connexion.App(__name__, specification_dir=os.path.abspath(os.pat
 app = connexion_app.app
 app.config.from_object(Config)
 
-for code in [400, 401, 403, 404, 405, 422, 500]:
+for code in [400, 401, 403, 404, 405, 422, 500, 503]:
     app.register_error_handler(code, route_error)
 
 db = SQLAlchemy(app)

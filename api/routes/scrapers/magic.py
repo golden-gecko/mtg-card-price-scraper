@@ -1,18 +1,18 @@
 from helpers import create_response
-from gatherer import GathererClient
-from mongo import MongoGatherer
+from magic import MagicClient
+from mongo import MongoMagic
 from rabbit import RabbitClient
 
 
 def route_cards(card_id):
-    mongo = MongoGatherer(host='mongo')
+    mongo = MongoMagic(host='mongo')
 
     rabbit = RabbitClient(host='rabbit')
     rabbit.connect()
 
-    gatherer = GathererClient(mongo=mongo, rabbit=rabbit)
+    magic = MagicClient(mongo=mongo, rabbit=rabbit)
 
-    if gatherer.queue_card(card_id=card_id):
+    if magic.queue_card(card_id=card_id):
         code = 200
     else:
         code = 500
@@ -21,14 +21,14 @@ def route_cards(card_id):
 
 
 def route_pages(page_id):
-    mongo = MongoGatherer(host='mongo')
+    mongo = MongoMagic(host='mongo')
 
     rabbit = RabbitClient(host='rabbit')
     rabbit.connect()
 
-    gatherer = GathererClient(mongo=mongo, rabbit=rabbit)
+    magic = MagicClient(mongo=mongo, rabbit=rabbit)
 
-    if gatherer.queue_page(page_id=page_id):
+    if magic.queue_page(page_id=page_id):
         code = 200
     else:
         code = 500
