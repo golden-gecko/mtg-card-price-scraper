@@ -14,7 +14,7 @@ lxml==6.1.0
 pika==1.1.0
 prometheus_client==0.7.1
 psycopg2-binary==2.8.4
-pymongo==4.6.3
+pymongo==4.18.3
 pytest==9.0.3
 pytest-html==2.0.1
 python-consul==1.1.0
